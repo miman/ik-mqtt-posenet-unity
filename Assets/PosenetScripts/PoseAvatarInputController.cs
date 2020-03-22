@@ -51,14 +51,14 @@ public class PoseAvatarInputController : PoseEventHandler {
     private bool adjusting = true;
 
     private Dictionary<string, List<PosePosition>> adjustmentMap = new Dictionary<string, List<PosePosition>>();
-    private List<PosePosition> hipAdjustmentList = new List<PosePosition>();
-    private List<PosePosition> hLfAdjustmentList = new List<PosePosition>();
-    private List<PosePosition> hRfAdjustmentList = new List<PosePosition>();
-    private List<PosePosition> hSAdjustmentList = new List<PosePosition>();
-    private List<PosePosition> sLhAdjustmentList = new List<PosePosition>();
-    private List<PosePosition> sRhAdjustmentList = new List<PosePosition>();
-    private List<PosePosition> sHAdjustmentList = new List<PosePosition>();
-
+    private string pelvisStr = "Pelvis";
+    private string leftHandStr = "Left Hand";
+    private string rightHandStr = "Right Hand";
+    private string leftFootStr = "Left Foot";
+    private string rightFootStr = "Right Foot";
+    private string headStr = "Head";
+    private string leftShoulderStr = "Left Shoulder";
+    private string rightShoulderStr = "Right Shoulder";
 
     /**
      * To keep track of max min values of tracking.
@@ -68,14 +68,14 @@ public class PoseAvatarInputController : PoseEventHandler {
     public void Start() {
         DontDestroyOnLoad(this);
 
-        adjustmentMap.Add("Pelvis", new List<PosePosition>());
-        adjustmentMap.Add("Left Hand", new List<PosePosition>());
-        adjustmentMap.Add("Right Hand", new List<PosePosition>());
-        adjustmentMap.Add("Left Foot", new List<PosePosition>());
-        adjustmentMap.Add("Right Foot", new List<PosePosition>());
-        adjustmentMap.Add("Left Shoulder", new List<PosePosition>());
-        adjustmentMap.Add("Right Shoulder", new List<PosePosition>());
-        adjustmentMap.Add("Head", new List<PosePosition>());
+        adjustmentMap.Add(pelvisStr, new List<PosePosition>());
+        adjustmentMap.Add(leftHandStr, new List<PosePosition>());
+        adjustmentMap.Add(rightHandStr, new List<PosePosition>());
+        adjustmentMap.Add(leftFootStr, new List<PosePosition>());
+        adjustmentMap.Add(rightFootStr, new List<PosePosition>());
+        adjustmentMap.Add(leftShoulderStr, new List<PosePosition>());
+        adjustmentMap.Add(rightShoulderStr, new List<PosePosition>());
+        adjustmentMap.Add(headStr, new List<PosePosition>());
 
         adjustmentEndTime = System.DateTime.Now;
         adjustmentEndTime = adjustmentEndTime.AddSeconds(secsForAdjustment);
@@ -90,64 +90,12 @@ public class PoseAvatarInputController : PoseEventHandler {
         if (adjusting) {
             if (System.DateTime.Now.CompareTo(adjustmentEndTime) > 0) {
                 // Adjustment time has ended
-                // Calculate factors
-                Vector2 sum = new Vector2();
-                sum.y = 0;
-                sum.x = 0;
-                foreach (PosePosition pp in hipAdjustmentList) {
-                    sum.y += pp.y;
-                    sum.x += pp.x;
-                }
-                Vector2 hipVector = new Vector2();
-                hipVector.x = (sum.x / hipAdjustmentList.Count);
-                hipVector.y = (sum.y / hipAdjustmentList.Count);
-                zeroPointAdjustment.x = hipVector.x;
-
-                sum.y = 0;
-                sum.x = 0;
-                foreach (PosePosition pp in hLfAdjustmentList) {
-                    sum.y += pp.y;
-                    sum.x += pp.x;
-                }
-                Vector2 leftFootvector = new Vector2(sum.x / hLfAdjustmentList.Count, sum.y / hLfAdjustmentList.Count);
-                zeroPointAdjustment.y = leftFootvector.y;
-
-                sum.y = 0;
-                sum.x = 0;
-                foreach (PosePosition pp in hRfAdjustmentList) {
-                    sum.y += pp.y;
-                    sum.x += pp.x;
-                }
-                Vector2 rightFootvector = new Vector2(sum.x / hRfAdjustmentList.Count, sum.y / hRfAdjustmentList.Count);
-                floorLevel = (floorLevel + rightFootvector.y)/2;  // Take average from left & right foot
-                zeroPointAdjustment.y = (zeroPointAdjustment.y + rightFootvector.y)/2; // Take average from left & right foot
-
-                scaleAdjustment.y = legLength / (hipVector.y - zeroPointAdjustment.y);
-
-                Debug.Log("Adjustment ended");
-                Debug.Log("Adjustment base data: hipVector: " + hipVector + ", leftFootvector = " + leftFootvector + ", rightFootvector: " + rightFootvector + ", # of adjustment entries: " + hipAdjustmentList.Count);
-                Debug.Log("Adjustment adaptions: zeroPointAdjustment: " + zeroPointAdjustment + ", scaleAdjustment = (" + scaleAdjustment.x + ", " + scaleAdjustment.y + ")");
-                Vector2 hipV = (hipVector - zeroPointAdjustment) * scaleAdjustment;
-                Debug.Log("Adjustment Test: hip = (" + hipV.x + ", " + hipV.y + ")");
+                handleAdjustmentInfo();
 
                 adjusting = false;
             } else {
                 Debug.Log("Adjusting...");
-                // Still adjusting
-                if (pelvisPose != null) {
-                    hipAdjustmentList.Add(pelvisPose);
-                }
-                
-                if (lastPose.leftAnkle != null) {
-                    hLfAdjustmentList.Add(lastPose.leftAnkle);
-                } else {
-                    Debug.Log("lastPose.leftAnkle == null !!!");
-                }
-                if (lastPose.rightAnkle != null) {
-                    hRfAdjustmentList.Add(lastPose.rightAnkle);
-                } else {
-                    Debug.Log("lastPose.rightAnkle == null !!!");
-                }
+                readAdjustmentInfo();
                 return; // Adjustment handled
             }
         }
@@ -158,6 +106,73 @@ public class PoseAvatarInputController : PoseEventHandler {
             lastPose = null;
         } else {
             //            Debug.Log("No lastPose present");
+        }
+    }
+
+    /**
+     * Using the adjustment info to prepare the system variables needed for operation
+     */
+    private void handleAdjustmentInfo() {
+        // Calculate factors
+        Vector2 sum = new Vector2();
+        sum.y = 0;
+        sum.x = 0;
+        foreach (PosePosition pp in adjustmentMap[pelvisStr]) {
+            sum.y += pp.y;
+            sum.x += pp.x;
+        }
+        Vector2 hipVector = new Vector2();
+        hipVector.x = (sum.x / adjustmentMap[pelvisStr].Count);
+        hipVector.y = (sum.y / adjustmentMap[pelvisStr].Count);
+        zeroPointAdjustment.x = hipVector.x;
+
+        // Handle left foot
+        sum.y = 0;
+        sum.x = 0;
+        foreach (PosePosition pp in adjustmentMap[leftFootStr]) {
+            sum.y += pp.y;
+            sum.x += pp.x;
+        }
+        Vector2 leftFootvector = new Vector2(sum.x / adjustmentMap[leftFootStr].Count, sum.y / adjustmentMap[leftFootStr].Count);
+        zeroPointAdjustment.y = leftFootvector.y;
+
+        sum.y = 0;
+        sum.x = 0;
+        foreach (PosePosition pp in adjustmentMap[rightFootStr]) {
+            sum.y += pp.y;
+            sum.x += pp.x;
+        }
+        Vector2 rightFootvector = new Vector2(sum.x / adjustmentMap[rightFootStr].Count, sum.y / adjustmentMap[rightFootStr].Count);
+        floorLevel = (floorLevel + rightFootvector.y) / 2;  // Take average from left & right foot
+        zeroPointAdjustment.y = (zeroPointAdjustment.y + rightFootvector.y) / 2; // Take average from left & right foot
+
+        scaleAdjustment.y = legLength / (hipVector.y - zeroPointAdjustment.y);
+
+        Debug.Log("Adjustment ended");
+        Debug.Log("Adjustment base data: hipVector: " + hipVector + ", leftFootvector = " + leftFootvector + ", rightFootvector: " + rightFootvector + ", # of adjustment entries: " + adjustmentMap[pelvisStr].Count);
+        Debug.Log("Adjustment adaptions: zeroPointAdjustment: " + zeroPointAdjustment + ", scaleAdjustment = (" + scaleAdjustment.x + ", " + scaleAdjustment.y + ")");
+        Vector2 hipV = (hipVector - zeroPointAdjustment) * scaleAdjustment;
+        Debug.Log("Adjustment Test: hip = (" + hipV.x + ", " + hipV.y + ")");
+    }
+
+    /**
+     * Reading adjustment information
+     */
+    private void readAdjustmentInfo() {
+        // Still adjusting
+        if (pelvisPose != null) {
+            adjustmentMap[pelvisStr].Add(pelvisPose);
+        }
+
+        if (lastPose.leftAnkle != null) {
+            adjustmentMap[leftFootStr].Add(lastPose.leftAnkle);
+        } else {
+            Debug.Log("lastPose.leftAnkle == null !!!");
+        }
+        if (lastPose.rightAnkle != null) {
+            adjustmentMap[rightFootStr].Add(lastPose.rightAnkle);
+        } else {
+            Debug.Log("lastPose.rightAnkle == null !!!");
         }
     }
 
