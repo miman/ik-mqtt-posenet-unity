@@ -199,11 +199,6 @@ public class PoseAvatarInputController : PoseEventHandler {
         handleNodeMovement(lastPose.rightKnee, rightKnee, ref prevRightKneeCoord, "rightKnee");
         handleNodeMovement(lastPose.leftAnkle, leftAnkle, ref prevLeftAnkleCoord, "leftAnkle");
         handleNodeMovement(lastPose.rightAnkle, rightAnkle, ref prevRightAnkleCoord, "rightAnkle");
-
-
-//        handleHipMovement(pelvisPose, pelvis, ref prevPelvisCoord);
-//        Vector3 hipV = new Vector3(pelvisPose.x, pelvisPose.y, 0);
-//        handleLeftFootMovement(lastPose.leftAnkle, hipV, leftAnkle, ref prevLeftAnkleCoord);
     }
 
     private void calculateFloorLevel(PoseEvent pose) {
@@ -227,47 +222,6 @@ public class PoseAvatarInputController : PoseEventHandler {
         //        Debug.Log("New pos for '" + desc + "', " + " Before: [x:" + previousCoord.x + ", y: " + previousCoord.y + "] -> After: [x: " + currentCoord.x + ", y: " + currentCoord.y + "]");
 
         return newCoord;
-    }
-
-    /**
-     * Act on node movement
-     * posPos values are in %
-     */
-    private void handleHipMovement(PosePosition posePos, GameObject node, ref Vector2 previousCoord) {
-        if (node == null) {
-            // GameObject not set -> ignore it
-            return;
-        }
-        // Try to remove gittering in positions due to invalid points by smoothening
-        previousCoord = smoothenMovement(posePos, previousCoord);
-        // Convert from percentage value to game coordinates & adjust for screen center not being zero in input
-        Vector2 currentCoord = (previousCoord - zeroPointAdjustment) * scaleAdjustment;
-
-        //        Debug.Log("New pos for '" + desc + "', " + " Before: [x:" + previousCoord.x + ", y: " + previousCoord.y + "] -> After: [x: " + currentCoord.x + ", y: " + currentCoord.y + "]");
-        //        Debug.Log("New pos for 'Hip', " + " Pose: [x:" + posePos.x + ", y: " + posePos.y + "] -> After: [x: " + currentCoord.x + ", y: " + currentCoord.y + "]");
-        //        Debug.Log("floorPercentageLevel: " + floorPercentageLevel + ", xAvgFactor: " + xAvgFactor);
-
-        // Set new position on node
-        Transform transform = node.transform;
-        transform.localPosition = new Vector3(currentCoord.x, currentCoord.y, transform.localPosition.z);
-    }
-
-    /**
-     * Act on node movement
-     * posPos values are in %
-     */
-    private void handleLeftFootMovement(PosePosition posePos, Vector3 hipPos, GameObject node, ref Vector2 previousCoord) {
-        if (node == null) {
-            // GameObject not set -> ignore it
-            return;
-        }
-        previousCoord = smoothenMovement(posePos, previousCoord);
-        Vector2 currentCoord = (previousCoord - zeroPointAdjustment) * scaleAdjustment;
-
-        //        Debug.Log("New pos for '" + desc + "', " + " Before: [x:" + previousCoord.x + ", y: " + previousCoord.y + "] -> After: [x: " + currentCoord.x + ", y: " + currentCoord.y + "]");
-        Debug.Log("New pos for Left foot': " + posePos + ", Hip: " + hipPos + " -> After: " + currentCoord);
-
-        node.transform.localPosition = new Vector3(currentCoord.x, currentCoord.y, 0);
     }
 
     /**
