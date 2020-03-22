@@ -191,6 +191,7 @@ public class PoseAvatarInputController : PoseEventHandler {
         handleNodeMovement(lastPose.rightShoulder, rightShoulder, ref prevRightShoulderCoord, "rightShoulder");
         handleNodeMovement(lastPose.leftElbow, leftElbow, ref prevLeftElbowCoord, "leftElbow");
         handleNodeMovement(lastPose.rightElbow, rightElbow, ref prevRightElbowCoord, "rightElbow");
+        handleNodeMovement(lastPose.leftWrist, leftWrist, ref prevLeftWristCoord, "leftWrist");
         handleNodeMovement(lastPose.rightWrist, rightWrist, ref prevRightWristCoord, "rightWrist");
         handleNodeMovement(lastPose.leftHip, leftHip, ref prevLeftHipCoord, "leftHip");
         handleNodeMovement(lastPose.rightHip, rightHip, ref prevRightHipCoord, "rightHip");
