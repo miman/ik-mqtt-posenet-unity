@@ -13,29 +13,31 @@ public class PoseAvatarInputController : PoseEventHandler {
     [Tooltip("The adjustment vector for what (0,0) is in %")]
     public Vector2 zeroPointAdjustment;
     [Tooltip("The adjustment for going from % to game coordinates")]
-    public Vector2 scaleAdjustment = new Vector2(2, 2);
+    public Vector2 legScaleAdjustment = new Vector2(2, 2);
+    [Tooltip("The adjustment for going from % to game coordinates")]
+    public Vector2 leftShoulderScaleAdjustment = new Vector2(2, 2);
+    [Tooltip("The adjustment for going from % to game coordinates")]
+    public Vector2 rightShoulderScaleAdjustment = new Vector2(2, 2);
+    
+    [Tooltip("The adjustment for the left hand related to the left shoulder")]
+    public Vector2 leftHandScaleAdjustment = new Vector2(2, 2);
+    [Tooltip("The adjustment for the right hand related to the right shoulder")]
+    public Vector2 rightHandScaleAdjustment = new Vector2(2, 2);
+    [Tooltip("The adjustment for the head related to the left shoulder")]
+    public Vector2 headScaleAdjustment = new Vector2(2, 2);
 
-    [Tooltip("The factor for going from % to game coord for Shoulder in relation to Hip")]
-    public float hSFactor = 2;
-    [Tooltip("The factor for going from % to game coord for Left Hand in relation to Shoulder")]
-    public float sLhFactor = 2;
-    [Tooltip("The factor for going from % to game coord for Right Hand in relation to Shoulder")]
-    public float sRhFactor = 2;
-    [Tooltip("The factor for going from % to game coord for Head in relation to Shoulder")]
-    public float sHFactor = 2;
-
-    [Tooltip("The average value for going from % to game X coordinates")]
-    public float xAvgFactor = 5;
-    [Tooltip("The center value for going from % to game X coordinates")]
-    public float centerFactor = 5;
     [Tooltip("The floor level in posenet Y-%")]
     public float floorLevel = 0;
 
     [Header("% to coordinate factors")]
     [Tooltip("The leg length in game coordinates")]
-    public float legLength = 1;
+    public float legLength = 1.155f;
     [Tooltip("The arm length in game coordinates")]
-    public float armLength = 1;
+    public float armLength = 0.76f;
+    [Tooltip("The body length in game coordinates (between pelvis & right/left shoulder)")]
+    public float bodyLength = 0.626f;
+    [Tooltip("The neck length in game coordinates (between nose & right/left shoulder)")]
+    public float neckLength = 0.277f;
 
     [Tooltip("# Secs for initial factor adjustment")]
     public float secsForAdjustment = 5;
@@ -59,6 +61,16 @@ public class PoseAvatarInputController : PoseEventHandler {
     private string headStr = "Head";
     private string leftShoulderStr = "Left Shoulder";
     private string rightShoulderStr = "Right Shoulder";
+
+    // The current position of each pose point
+    private Vector2 currentPelvisPos = new Vector2();
+    private Vector2 currentLeftHandPos = new Vector2();
+    private Vector2 currentRightHandPos = new Vector2();
+    private Vector2 currentLeftFootPos = new Vector2();
+    private Vector2 currentRightFootPos = new Vector2();
+    private Vector2 currentLeftShoulderPos = new Vector2();
+    private Vector2 currentRightShoulderPos = new Vector2();
+    private Vector2 currentHeadPos = new Vector2();
 
     /**
      * To keep track of max min values of tracking.
@@ -114,9 +126,7 @@ public class PoseAvatarInputController : PoseEventHandler {
      */
     private void handleAdjustmentInfo() {
         // Calculate factors
-        Vector2 sum = new Vector2();
-        sum.y = 0;
-        sum.x = 0;
+        Vector2 sum = new Vector2(0, 0);
         foreach (PosePosition pp in adjustmentMap[pelvisStr]) {
             sum.y += pp.y;
             sum.x += pp.x;
@@ -127,32 +137,58 @@ public class PoseAvatarInputController : PoseEventHandler {
         zeroPointAdjustment.x = hipVector.x;
 
         // Handle left foot
-        sum.y = 0;
-        sum.x = 0;
-        foreach (PosePosition pp in adjustmentMap[leftFootStr]) {
-            sum.y += pp.y;
-            sum.x += pp.x;
-        }
-        Vector2 leftFootvector = new Vector2(sum.x / adjustmentMap[leftFootStr].Count, sum.y / adjustmentMap[leftFootStr].Count);
+        Vector2 leftFootvector = getAverageAdjustmentValue(leftFootStr);
         zeroPointAdjustment.y = leftFootvector.y;
 
-        sum.y = 0;
-        sum.x = 0;
-        foreach (PosePosition pp in adjustmentMap[rightFootStr]) {
-            sum.y += pp.y;
-            sum.x += pp.x;
-        }
-        Vector2 rightFootvector = new Vector2(sum.x / adjustmentMap[rightFootStr].Count, sum.y / adjustmentMap[rightFootStr].Count);
+        // Handle right foot
+        Vector2 rightFootvector = getAverageAdjustmentValue(rightFootStr);
         floorLevel = (floorLevel + rightFootvector.y) / 2;  // Take average from left & right foot
         zeroPointAdjustment.y = (zeroPointAdjustment.y + rightFootvector.y) / 2; // Take average from left & right foot
 
-        scaleAdjustment.y = legLength / (hipVector.y - zeroPointAdjustment.y);
+        legScaleAdjustment.y = legLength / (hipVector.y - zeroPointAdjustment.y);
+
+        // Handle shoulders
+        Vector2 leftShoulderVector = getAverageAdjustmentValue(leftShoulderStr);
+        Vector2 rightShoulderVector = getAverageAdjustmentValue(rightShoulderStr);
+        float bodyScale = bodyLength / (leftShoulderVector - hipVector).magnitude;
+        leftShoulderScaleAdjustment = bodyScale * (leftShoulderVector - hipVector);
+        rightShoulderScaleAdjustment = bodyScale * (rightShoulderVector - hipVector);
+
+        // Handle hands
+        Vector2 leftWristVector = getAverageAdjustmentValue(leftHandStr);
+        Vector2 rightWristVector = getAverageAdjustmentValue(rightHandStr);
+        float armScale = armLength / (leftWristVector - leftShoulderVector).magnitude;
+        leftHandScaleAdjustment = armScale * (leftShoulderVector - leftWristVector);
+        rightHandScaleAdjustment = armScale * (rightShoulderVector - rightWristVector);
+
+        // Handle head
+        Vector2 headVector = getAverageAdjustmentValue(headStr);
+        float headScale = neckLength / (headVector - leftShoulderVector).magnitude;
+        headScaleAdjustment = headScale * (headVector - leftShoulderVector);
 
         Debug.Log("Adjustment ended");
         Debug.Log("Adjustment base data: hipVector: " + hipVector + ", leftFootvector = " + leftFootvector + ", rightFootvector: " + rightFootvector + ", # of adjustment entries: " + adjustmentMap[pelvisStr].Count);
-        Debug.Log("Adjustment adaptions: zeroPointAdjustment: " + zeroPointAdjustment + ", scaleAdjustment = (" + scaleAdjustment.x + ", " + scaleAdjustment.y + ")");
-        Vector2 hipV = (hipVector - zeroPointAdjustment) * scaleAdjustment;
+        Debug.Log("Adjustment base data: leftShoulderVector: " + leftShoulderVector + ", rightShoulderVector = " + rightShoulderVector + ", headVector: " + headVector);
+        Debug.Log("Adjustment base data: leftWristVector: " + leftWristVector + ", rightWristVector = " + rightWristVector);
+        Debug.Log("Adjustment adaptions: zeroPointAdjustment: " + zeroPointAdjustment);
+        Debug.Log("Adjustment adaptions: legScaleAdjustment = (" + legScaleAdjustment.x + ", " + legScaleAdjustment.y + ")");
+        Debug.Log("Adjustment adaptions: leftShoulderScaleAdjustment = (" + leftShoulderScaleAdjustment.x + ", " + leftShoulderScaleAdjustment.y + ")");
+        Debug.Log("Adjustment adaptions: rightShoulderScaleAdjustment = (" + rightShoulderScaleAdjustment.x + ", " + rightShoulderScaleAdjustment.y + ")");
+        Debug.Log("Adjustment adaptions: leftHandScaleAdjustment = (" + leftHandScaleAdjustment.x + ", " + leftHandScaleAdjustment.y + ")");
+        Debug.Log("Adjustment adaptions: rightHandScaleAdjustment = (" + rightHandScaleAdjustment.x + ", " + rightHandScaleAdjustment.y + ")");
+        Debug.Log("Adjustment adaptions: headScaleAdjustment = (" + headScaleAdjustment.x + ", " + headScaleAdjustment.y + ")");
+        Vector2 hipV = (hipVector - zeroPointAdjustment) * legScaleAdjustment;
         Debug.Log("Adjustment Test: hip = (" + hipV.x + ", " + hipV.y + ")");
+    }
+
+    private Vector2 getAverageAdjustmentValue(string bodyPartStr) {
+        Vector2 sum = new Vector2(0, 0);
+        foreach (PosePosition pp in adjustmentMap[bodyPartStr]) {
+            sum.y += pp.y;
+            sum.x += pp.x;
+        }
+        Vector2 averageVector = new Vector2(sum.x / adjustmentMap[bodyPartStr].Count, sum.y / adjustmentMap[bodyPartStr].Count);
+        return averageVector;
     }
 
     /**
@@ -174,31 +210,56 @@ public class PoseAvatarInputController : PoseEventHandler {
         } else {
             Debug.Log("lastPose.rightAnkle == null !!!");
         }
+        if (lastPose.rightShoulder != null) {
+            adjustmentMap[rightShoulderStr].Add(lastPose.rightShoulder);
+        } else {
+            Debug.Log("lastPose.rightShoulder == null !!!");
+        }
+        if (lastPose.leftShoulder != null) {
+            adjustmentMap[leftShoulderStr].Add(lastPose.leftShoulder);
+        } else {
+            Debug.Log("lastPose.leftShoulder == null !!!");
+        }
+        if (lastPose.rightWrist != null) {
+            adjustmentMap[rightHandStr].Add(lastPose.rightWrist);
+        } else {
+            Debug.Log("lastPose.rightWrist == null !!!");
+        }
+        if (lastPose.leftWrist != null) {
+            adjustmentMap[leftHandStr].Add(lastPose.leftWrist);
+        } else {
+            Debug.Log("lastPose.leftWrist == null !!!");
+        }
+        if (lastPose.nose != null) {
+            adjustmentMap[headStr].Add(lastPose.nose);
+        } else {
+            Debug.Log("lastPose.nose == null !!!");
+        }
     }
 
     private void handleNewPoseEvent(PoseEvent pose) {
         calculateFloorLevel(pose);
 
-        handleNodeMovement(pelvisPose, pelvis, ref prevPelvisCoord, "Pelvis");
-        handleNodeMovement(middleSpinePose, middleSpine, ref prevMiddleSpineCoord, "MiddleSpine");
+        handleNodeMovement(pelvisPose, pelvis, ref prevPelvisCoord, "Pelvis", ref currentPelvisPos);
+//        handleNodeMovement(middleSpinePose, middleSpine, ref prevMiddleSpineCoord, "MiddleSpine");
 
-        handleNodeMovement(lastPose.nose, nose, ref prevNoseCoord, "nose");
-        handleNodeMovement(lastPose.leftEye, leftEye, ref prevLeftEyeCoord, "leftEye");
-        handleNodeMovement(lastPose.rightEye, rightEye, ref prevRightEyeCoord, "rightEye");
-        handleNodeMovement(lastPose.leftEar, leftEar, ref prevLeftEarCoord, "leftEar");
-        handleNodeMovement(lastPose.rightEar, rightEar, ref prevRightEarCoord, "rightEar");
-        handleNodeMovement(lastPose.leftShoulder, leftShoulder, ref prevLeftShoulderCoord, "leftShoulder");
-        handleNodeMovement(lastPose.rightShoulder, rightShoulder, ref prevRightShoulderCoord, "rightShoulder");
-        handleNodeMovement(lastPose.leftElbow, leftElbow, ref prevLeftElbowCoord, "leftElbow");
-        handleNodeMovement(lastPose.rightElbow, rightElbow, ref prevRightElbowCoord, "rightElbow");
-        handleNodeMovement(lastPose.leftWrist, leftWrist, ref prevLeftWristCoord, "leftWrist");
-        handleNodeMovement(lastPose.rightWrist, rightWrist, ref prevRightWristCoord, "rightWrist");
-        handleNodeMovement(lastPose.leftHip, leftHip, ref prevLeftHipCoord, "leftHip");
-        handleNodeMovement(lastPose.rightHip, rightHip, ref prevRightHipCoord, "rightHip");
-        handleNodeMovement(lastPose.leftKnee, leftKnee, ref prevLeftKneeCoord, "leftKnee");
-        handleNodeMovement(lastPose.rightKnee, rightKnee, ref prevRightKneeCoord, "rightKnee");
-        handleNodeMovement(lastPose.leftAnkle, leftAnkle, ref prevLeftAnkleCoord, "leftAnkle");
-        handleNodeMovement(lastPose.rightAnkle, rightAnkle, ref prevRightAnkleCoord, "rightAnkle");
+        handleLeftShoulderNodeMovement(lastPose.leftShoulder, leftShoulder, ref prevLeftShoulderCoord, "leftShoulder");
+        handleLeftShoulderNodeMovement(lastPose.rightShoulder, rightShoulder, ref prevRightShoulderCoord, "rightShoulder");
+        handleNodeMovement(lastPose.nose, nose, ref prevNoseCoord, "nose", ref currentHeadPos);
+//        handleNodeMovement(lastPose.leftEye, leftEye, ref prevLeftEyeCoord, "leftEye");
+//        handleNodeMovement(lastPose.rightEye, rightEye, ref prevRightEyeCoord, "rightEye");
+        //handleNodeMovement(lastPose.leftEar, leftEar, ref prevLeftEarCoord, "leftEar");
+//        handleNodeMovement(lastPose.rightEar, rightEar, ref prevRightEarCoord, "rightEar");
+//        handleNodeMovement(lastPose.leftElbow, leftElbow, ref prevLeftElbowCoord, "leftElbow");
+//        handleNodeMovement(lastPose.rightElbow, rightElbow, ref prevRightElbowCoord, "rightElbow");
+        handleLeftHandNodeMovement(lastPose.leftWrist, leftWrist, ref prevLeftWristCoord, "leftWrist");
+        handleRightHandNodeMovement(lastPose.rightWrist, rightWrist, ref prevRightWristCoord, "rightWrist");
+//        handleNodeMovement(lastPose.leftHip, leftHip, ref prevLeftHipCoord, "leftHip");
+//        handleNodeMovement(lastPose.rightHip, rightHip, ref prevRightHipCoord, "rightHip");
+//        handleNodeMovement(lastPose.leftKnee, leftKnee, ref prevLeftKneeCoord, "leftKnee");
+//        handleNodeMovement(lastPose.rightKnee, rightKnee, ref prevRightKneeCoord, "rightKnee");
+        handleNodeMovement(lastPose.leftAnkle, leftAnkle, ref prevLeftAnkleCoord, "leftAnkle", ref currentLeftFootPos);
+        handleNodeMovement(lastPose.rightAnkle, rightAnkle, ref prevRightAnkleCoord, "rightAnkle", ref currentRightFootPos);
     }
 
     private void calculateFloorLevel(PoseEvent pose) {
@@ -231,7 +292,7 @@ public class PoseAvatarInputController : PoseEventHandler {
      * param name="node"    The node this position is for
      * param name="previousCoord" The previous coordinate
      */
-    private void handleNodeMovement(PosePosition posePos, GameObject node, ref Vector2 previousCoord, string nodeName) {
+    private void handleNodeMovement(PosePosition posePos, GameObject node, ref Vector2 previousCoord, string nodeName, ref Vector2 currentPos) {
         if (node == null) {
             // GameObject not set -> ignore it
             return;
@@ -239,10 +300,136 @@ public class PoseAvatarInputController : PoseEventHandler {
         // Try to remove gittering in positions due to invalid points by smoothening
         previousCoord = smoothenMovement(posePos, previousCoord);
         // Convert from percentage value to game coordinates & adjust for screen center not being zero in input
-        Vector2 currentCoord = (previousCoord - zeroPointAdjustment) * scaleAdjustment;
+        currentPos = (previousCoord - zeroPointAdjustment) * legScaleAdjustment;
+
+        Debug.Log("New pos for '" + nodeName + "', " + " Pose: " + posePos + " -> After: " + currentPos);
+        //        Debug.Log("floorPercentageLevel: " + floorPercentageLevel + ", xAvgFactor: " + xAvgFactor);
+
+        // Set new position on node
+        Transform transform = node.transform;
+        transform.localPosition = new Vector3(currentPos.x, currentPos.y, transform.localPosition.z);
+    }
+
+    /**
+     * Act on node movement
+     * posPos values are in %
+     * param name="posePos" The current position in %
+     * param name="node"    The node this position is for
+     * param name="previousCoord" The previous coordinate
+     */
+    private void handleLeftShoulderNodeMovement(PosePosition posePos, GameObject node, ref Vector2 previousCoord, string nodeName) {
+        if (node == null) {
+            // GameObject not set -> ignore it
+            return;
+        }
+        // Try to remove gittering in positions due to invalid points by smoothening
+        previousCoord = smoothenMovement(posePos, previousCoord);
+        // Convert from percentage value to game coordinates & adjust for screen center not being zero in input
+        Vector2 currentCoord = (previousCoord - prevPelvisCoord) * leftShoulderScaleAdjustment + currentPelvisPos;
+        currentLeftShoulderPos.x = currentCoord.x;
+        currentLeftShoulderPos.y = currentCoord.y;
+
+        Debug.Log("New pos for '" + nodeName + "', " + " Pose: " + posePos + " -> After: " + currentCoord);
+        Debug.Log("previousCoord: " + previousCoord + ", currentLeftShoulderPos: " + currentLeftShoulderPos);
+
+        // Set new position on node
+        Transform transform = node.transform;
+        transform.localPosition = new Vector3(currentCoord.x, currentCoord.y, transform.localPosition.z);
+    }
+
+    /**
+ * Act on node movement
+ * posPos values are in %
+ * param name="posePos" The current position in %
+ * param name="node"    The node this position is for
+ * param name="previousCoord" The previous coordinate
+ */
+    private void handleRightShoulderNodeMovement(PosePosition posePos, GameObject node, ref Vector2 previousCoord, string nodeName) {
+        if (node == null) {
+            // GameObject not set -> ignore it
+            return;
+        }
+        // Try to remove gittering in positions due to invalid points by smoothening
+        previousCoord = smoothenMovement(posePos, previousCoord);
+        // Convert from percentage value to game coordinates & adjust for screen center not being zero in input
+        Vector2 currentCoord = (previousCoord - prevPelvisCoord) * rightShoulderScaleAdjustment + currentPelvisPos;
+        currentRightShoulderPos.x = currentCoord.x;
+        currentRightShoulderPos.y = currentCoord.y;
 
         Debug.Log("New pos for '" + nodeName + "', " + " Pose: " + posePos + " -> After: " + currentCoord);
         //        Debug.Log("floorPercentageLevel: " + floorPercentageLevel + ", xAvgFactor: " + xAvgFactor);
+
+        // Set new position on node
+        Transform transform = node.transform;
+        transform.localPosition = new Vector3(currentCoord.x, currentCoord.y, transform.localPosition.z);
+    }
+
+    /**
+     * Act on node movement
+     * posPos values are in %
+     * param name="posePos" The current position in %
+     * param name="node"    The node this position is for
+     * param name="previousCoord" The previous coordinate
+     */
+    private void handleLeftHandNodeMovement(PosePosition posePos, GameObject node, ref Vector2 previousCoord, string nodeName) {
+        if (node == null) {
+            // GameObject not set -> ignore it
+            return;
+        }
+        // Try to remove gittering in positions due to invalid points by smoothening
+        previousCoord = smoothenMovement(posePos, previousCoord);
+        // Convert from percentage value to game coordinates & adjust for screen center not being zero in input
+        Vector2 currentCoord = (previousCoord - prevLeftShoulderCoord) * leftHandScaleAdjustment + currentLeftShoulderPos;
+
+        Debug.Log("New pos for '" + nodeName + "', " + " Pose: " + posePos + " -> After: " + currentCoord);
+
+        // Set new position on node
+        Transform transform = node.transform;
+        transform.localPosition = new Vector3(currentCoord.x, currentCoord.y, transform.localPosition.z);
+    }
+
+    /**
+     * Act on node movement
+     * posPos values are in %
+     * param name="posePos" The current position in %
+     * param name="node"    The node this position is for
+     * param name="previousCoord" The previous coordinate
+     */
+    private void handleRightHandNodeMovement(PosePosition posePos, GameObject node, ref Vector2 previousCoord, string nodeName) {
+        if (node == null) {
+            // GameObject not set -> ignore it
+            return;
+        }
+        // Try to remove gittering in positions due to invalid points by smoothening
+        previousCoord = smoothenMovement(posePos, previousCoord);
+        // Convert from percentage value to game coordinates & adjust for screen center not being zero in input
+        Vector2 currentCoord = (previousCoord - prevRightShoulderCoord) * rightHandScaleAdjustment + currentRightShoulderPos;
+
+        Debug.Log("New pos for '" + nodeName + "', " + " Pose: " + posePos + " -> After: " + currentCoord);
+
+        // Set new position on node
+        Transform transform = node.transform;
+        transform.localPosition = new Vector3(currentCoord.x, currentCoord.y, transform.localPosition.z);
+    }
+
+    /**
+     * Act on node movement
+     * posPos values are in %
+     * param name="posePos" The current position in %
+     * param name="node"    The node this position is for
+     * param name="previousCoord" The previous coordinate
+     */
+    private void handleHeadNodeMovement(PosePosition posePos, GameObject node, ref Vector2 previousCoord, string nodeName) {
+        if (node == null) {
+            // GameObject not set -> ignore it
+            return;
+        }
+        // Try to remove gittering in positions due to invalid points by smoothening
+        previousCoord = smoothenMovement(posePos, previousCoord);
+        // Convert from percentage value to game coordinates & adjust for screen center not being zero in input
+        Vector2 currentCoord = (previousCoord - prevLeftShoulderCoord) * headScaleAdjustment + currentLeftShoulderPos;
+
+        Debug.Log("New pos for '" + nodeName + "', " + " Pose: " + posePos + " -> After: " + currentCoord);
 
         // Set new position on node
         Transform transform = node.transform;

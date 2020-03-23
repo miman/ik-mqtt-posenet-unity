@@ -913,8 +913,8 @@ MonoBehaviour:
   rightEye: {fileID: 0}
   leftEar: {fileID: 0}
   rightEar: {fileID: 0}
-  leftShoulder: {fileID: 0}
-  rightShoulder: {fileID: 0}
+  leftShoulder: {fileID: 2111084419}
+  rightShoulder: {fileID: 75727143}
   leftElbow: {fileID: 0}
   rightElbow: {fileID: 0}
   leftWrist: {fileID: 149434834}
@@ -929,16 +929,16 @@ MonoBehaviour:
   middleSpine: {fileID: 0}
   smoothening: 3
   zeroPointAdjustment: {x: 0, y: 0}
-  scaleAdjustment: {x: 0.015, y: 2}
-  hSFactor: 2
-  sLhFactor: 2
-  sRhFactor: 2
-  sHFactor: 2
-  xAvgFactor: 0.03
-  centerFactor: 1
+  legScaleAdjustment: {x: 0.02, y: 2}
+  shoulderScaleAdjustment: {x: 2, y: 2}
+  leftHandScaleAdjustment: {x: 2, y: 2}
+  rightHandScaleAdjustment: {x: 2, y: 2}
+  headScaleAdjustment: {x: 2, y: 2}
   floorLevel: 0
   legLength: 1.155
-  armLength: 1
+  armLength: 0.76
+  bodyLength: 0.626
+  neckLength: 0.277
   secsForAdjustment: 5
   avatar: {fileID: 1007457736}
 --- !u!1001 &1080996733
@@ -1155,17 +1155,17 @@ PrefabInstance:
     - target: {fileID: 3531023867771002507, guid: 05b9a7d15d076704488903bbcfc2c860,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: -0.022
+      value: 0.175
       objectReference: {fileID: 0}
     - target: {fileID: 3531023867771002507, guid: 05b9a7d15d076704488903bbcfc2c860,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 2.516
+      value: 1.627
       objectReference: {fileID: 0}
     - target: {fileID: 3531023867771002507, guid: 05b9a7d15d076704488903bbcfc2c860,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: -0.2
       objectReference: {fileID: 0}
     - target: {fileID: 3531023867771002507, guid: 05b9a7d15d076704488903bbcfc2c860,
         type: 3}
