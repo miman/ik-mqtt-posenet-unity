@@ -4,7 +4,7 @@ using UnityEngine;
 using System;
 
 /**
- * Uses Posenet input to send control commands to the game
+ * Uses Posenet input to set the position of the gameobjects set in this script mapped to the correct body part.
  */
 public class PoseInputController : PoseEventHandler, CameraDimensionObserver {
 
@@ -41,23 +41,23 @@ public class PoseInputController : PoseEventHandler, CameraDimensionObserver {
     {
         if (lastPose != null)
         {   // act on last pose-event
-            handleNodedMovement(lastPose.nose, nose, ref prevNoseCoord, "nose");
-            handleNodedMovement(lastPose.leftEye, leftEye, ref prevLeftEyeCoord, "leftEye");
-            handleNodedMovement(lastPose.rightEye, rightEye, ref prevRightEyeCoord, "rightEye");
-            handleNodedMovement(lastPose.leftEar, leftEar, ref prevLeftEarCoord, "leftEar");
-            handleNodedMovement(lastPose.rightEar, rightEar, ref prevRightEarCoord, "rightEar");
-            handleNodedMovement(lastPose.leftShoulder, leftShoulder, ref prevLeftShoulderCoord, "leftShoulder");
-            handleNodedMovement(lastPose.rightShoulder, rightShoulder, ref prevRightShoulderCoord, "rightShoulder");
-            handleNodedMovement(lastPose.leftElbow, leftElbow, ref prevLeftElbowCoord, "leftElbow");
-            handleNodedMovement(lastPose.rightElbow, rightElbow, ref prevRightElbowCoord, "rightElbow");
-            handleNodedMovement(lastPose.leftWrist, leftWrist, ref prevLeftWristCoord, "leftWrist");
-            handleNodedMovement(lastPose.rightWrist, rightWrist, ref prevRightWristCoord, "rightWrist");
-            handleNodedMovement(lastPose.leftHip, leftHip, ref prevLeftHipCoord, "leftHip");
-            handleNodedMovement(lastPose.rightHip, rightHip, ref prevRightHipCoord, "rightHip");
-            handleNodedMovement(lastPose.leftKnee, leftKnee, ref prevLeftKneeCoord, "leftKnee");
-            handleNodedMovement(lastPose.rightKnee, rightKnee, ref prevRightKneeCoord, "rightKnee");
-            handleNodedMovement(lastPose.leftAnkle, leftAnkle, ref prevLeftAnkleCoord, "leftAnkle");
-            handleNodedMovement(lastPose.rightAnkle, rightAnkle, ref prevRightAnkleCoord, "rightAnkle");
+            handleNodeMovement(lastPose.nose, nose, ref prevNoseCoord, "nose");
+            handleNodeMovement(lastPose.leftEye, leftEye, ref prevLeftEyeCoord, "leftEye");
+            handleNodeMovement(lastPose.rightEye, rightEye, ref prevRightEyeCoord, "rightEye");
+            handleNodeMovement(lastPose.leftEar, leftEar, ref prevLeftEarCoord, "leftEar");
+            handleNodeMovement(lastPose.rightEar, rightEar, ref prevRightEarCoord, "rightEar");
+            handleNodeMovement(lastPose.leftShoulder, leftShoulder, ref prevLeftShoulderCoord, "leftShoulder");
+            handleNodeMovement(lastPose.rightShoulder, rightShoulder, ref prevRightShoulderCoord, "rightShoulder");
+            handleNodeMovement(lastPose.leftElbow, leftElbow, ref prevLeftElbowCoord, "leftElbow");
+            handleNodeMovement(lastPose.rightElbow, rightElbow, ref prevRightElbowCoord, "rightElbow");
+            handleNodeMovement(lastPose.leftWrist, leftWrist, ref prevLeftWristCoord, "leftWrist");
+            handleNodeMovement(lastPose.rightWrist, rightWrist, ref prevRightWristCoord, "rightWrist");
+            handleNodeMovement(lastPose.leftHip, leftHip, ref prevLeftHipCoord, "leftHip");
+            handleNodeMovement(lastPose.rightHip, rightHip, ref prevRightHipCoord, "rightHip");
+            handleNodeMovement(lastPose.leftKnee, leftKnee, ref prevLeftKneeCoord, "leftKnee");
+            handleNodeMovement(lastPose.rightKnee, rightKnee, ref prevRightKneeCoord, "rightKnee");
+            handleNodeMovement(lastPose.leftAnkle, leftAnkle, ref prevLeftAnkleCoord, "leftAnkle");
+            handleNodeMovement(lastPose.rightAnkle, rightAnkle, ref prevRightAnkleCoord, "rightAnkle");
 
             PosePosition pelvisPose = new PosePosition();
             pelvisPose.x = (lastPose.rightHip.x + lastPose.leftHip.x)/2;
@@ -65,8 +65,8 @@ public class PoseInputController : PoseEventHandler, CameraDimensionObserver {
             PosePosition middleSpinePose = new PosePosition();
             middleSpinePose.x = (lastPose.rightHip.x + lastPose.leftShoulder.x) / 2;
             middleSpinePose.y = (lastPose.leftShoulder.y + lastPose.leftHip.y) / 2;
-            handleNodedMovement(pelvisPose, pelvis, ref prevPelvisCoord, "Pelvis");
-            handleNodedMovement(middleSpinePose, middleSpine, ref prevMiddleSpineCoord, "MiddleSpine");
+            handleNodeMovement(pelvisPose, pelvis, ref prevPelvisCoord, "Pelvis");
+            handleNodeMovement(middleSpinePose, middleSpine, ref prevMiddleSpineCoord, "MiddleSpine");
 
             processedPose = lastPose;
             lastPose = null;
@@ -80,7 +80,7 @@ public class PoseInputController : PoseEventHandler, CameraDimensionObserver {
      * Act on node movement
      * Value can be [0 - 600]
      */
-    private void handleNodedMovement(PosePosition posePos, GameObject node, ref Vector2 previousCoord, string desc)
+    private void handleNodeMovement(PosePosition posePos, GameObject node, ref Vector2 previousCoord, string desc)
     {
         if (node == null) {
             // GameObject not set -> ignore it

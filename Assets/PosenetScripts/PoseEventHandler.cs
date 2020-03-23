@@ -97,6 +97,9 @@ public class PoseEventHandler: MonoBehaviour {
         prevMiddleSpineCoord = new Vector2(xFactor, yFactor);
     }
 
+    /**
+     * Calculates the pelvis & middleSpine positions based on the other points
+     */
     protected void calculateCalculatedNodes(PoseEvent newPose) {
         pelvisPose = new PosePosition();
         pelvisPose.x = (newPose.rightHip.x + newPose.leftHip.x) / 2;
