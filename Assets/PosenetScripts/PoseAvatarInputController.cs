@@ -18,7 +18,9 @@ public class PoseAvatarInputController : PoseEventHandler {
     public float leftShoulderScaleAdjustment = 0.02f;
     [Tooltip("The adjustment for going from % to game coordinates")]
     public float rightShoulderScaleAdjustment = 0.02f;
-    
+    [Tooltip("The adjustment for going from % to game coordinates")]
+    public float shoulderWidthScaleAdjustment = 0.02f;
+
     [Tooltip("The adjustment for the left hand related to the left shoulder")]
     public float leftHandScaleAdjustment = 0.02f;
     [Tooltip("The adjustment for the right hand related to the right shoulder")]
@@ -35,6 +37,8 @@ public class PoseAvatarInputController : PoseEventHandler {
     public float bodyLength = 0.626f;
     [Tooltip("The neck length in game coordinates (between nose & right/left shoulder)")]
     public float neckLength = 0.277f;
+    [Tooltip("The shoulder width in game coordinates (between right & left shoulder)")]
+    public float shoulderWidth = 0.34f;
 
     [Tooltip("# Secs for initial factor adjustment")]
     public float secsForAdjustment = 5;
@@ -173,6 +177,9 @@ public class PoseAvatarInputController : PoseEventHandler {
         rightHandScaleAdjustment = armLength / (rightWristVector - rightShoulderVector).magnitude;
 
         headScaleAdjustment = neckLength / (headVector - leftShoulderVector).magnitude;
+
+        shoulderWidthScaleAdjustment = shoulderWidth / (leftShoulderVector - rightShoulderVector).magnitude;
+
 
         Debug.Log("Adjustment ended");
         Debug.Log("Adjustment base data: hipVector: " + hipVector + ", leftFootvector = " + leftFootvector + ", rightFootvector: " + rightFootvector + ", # of adjustment entries: " + adjustmentMap[pelvisStr].Count);
@@ -334,16 +341,15 @@ public class PoseAvatarInputController : PoseEventHandler {
         // Try to remove gittering in positions due to invalid points by smoothening
         previousCoord = smoothenMovement(posePos, previousCoord);
         // Convert from percentage value to game coordinates & adjust for screen center not being zero in input
-        Vector2 currentCoord = (previousCoord - prevPelvisCoord) * leftShoulderScaleAdjustment + currentPelvisPos;
-        currentLeftShoulderPos.x = currentCoord.x;
-        currentLeftShoulderPos.y = currentCoord.y;
+        currentLeftShoulderPos.x = (previousCoord.x - prevPelvisCoord.x) * shoulderWidthScaleAdjustment / 2 + currentPelvisPos.x;
+        currentLeftShoulderPos.y = (previousCoord.y - prevPelvisCoord.y) * leftShoulderScaleAdjustment + currentPelvisPos.y;
 
-        Debug.Log("New pos for '" + nodeName + "', " + " Pose: " + posePos + " -> After: " + currentCoord);
+        Debug.Log("New pos for '" + nodeName + "', " + " Pose: " + posePos + " -> After: " + currentLeftShoulderPos);
         Debug.Log("previousCoord: " + previousCoord + ", currentLeftShoulderPos: " + currentLeftShoulderPos);
 
         // Set new position on node
         Transform transform = node.transform;
-        transform.localPosition = new Vector3(currentCoord.x, currentCoord.y, transform.localPosition.z);
+        transform.localPosition = new Vector3(currentLeftShoulderPos.x, currentLeftShoulderPos.y, transform.localPosition.z);
     }
 
     /**
@@ -361,16 +367,15 @@ public class PoseAvatarInputController : PoseEventHandler {
         // Try to remove gittering in positions due to invalid points by smoothening
         previousCoord = smoothenMovement(posePos, previousCoord);
         // Convert from percentage value to game coordinates & adjust for screen center not being zero in input
-        Vector2 currentCoord = (previousCoord - prevPelvisCoord) * rightShoulderScaleAdjustment + currentPelvisPos;
-        currentRightShoulderPos.x = currentCoord.x;
-        currentRightShoulderPos.y = currentCoord.y;
+        currentRightShoulderPos.x = (previousCoord.x - prevPelvisCoord.x) * shoulderWidthScaleAdjustment/2 + currentPelvisPos.x;
+        currentRightShoulderPos.y = (previousCoord.y - prevPelvisCoord.y) * rightShoulderScaleAdjustment + currentPelvisPos.y;
 
-        Debug.Log("New pos for '" + nodeName + "', " + " Pose: " + posePos + " -> After: " + currentCoord);
+        Debug.Log("New pos for '" + nodeName + "', " + " Pose: " + posePos + " -> After: " + currentRightShoulderPos);
         //        Debug.Log("floorPercentageLevel: " + floorPercentageLevel + ", xAvgFactor: " + xAvgFactor);
 
         // Set new position on node
         Transform transform = node.transform;
-        transform.localPosition = new Vector3(currentCoord.x, currentCoord.y, transform.localPosition.z);
+        transform.localPosition = new Vector3(currentRightShoulderPos.x, currentRightShoulderPos.y, transform.localPosition.z);
     }
 
     /**
