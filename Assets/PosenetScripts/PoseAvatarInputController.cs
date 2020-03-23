@@ -13,18 +13,18 @@ public class PoseAvatarInputController : PoseEventHandler {
     [Tooltip("The adjustment vector for what (0,0) is in %")]
     public Vector2 zeroPointAdjustment;
     [Tooltip("The adjustment for going from % to game coordinates")]
-    public Vector2 legScaleAdjustment = new Vector2(2, 2);
+    public float legScaleAdjustment = 0.02f;
     [Tooltip("The adjustment for going from % to game coordinates")]
-    public Vector2 leftShoulderScaleAdjustment = new Vector2(2, 2);
+    public float leftShoulderScaleAdjustment = 0.02f;
     [Tooltip("The adjustment for going from % to game coordinates")]
-    public Vector2 rightShoulderScaleAdjustment = new Vector2(2, 2);
+    public float rightShoulderScaleAdjustment = 0.02f;
     
     [Tooltip("The adjustment for the left hand related to the left shoulder")]
-    public Vector2 leftHandScaleAdjustment = new Vector2(2, 2);
+    public float leftHandScaleAdjustment = 0.02f;
     [Tooltip("The adjustment for the right hand related to the right shoulder")]
-    public Vector2 rightHandScaleAdjustment = new Vector2(2, 2);
+    public float rightHandScaleAdjustment = 0.02f;
     [Tooltip("The adjustment for the head related to the left shoulder")]
-    public Vector2 headScaleAdjustment = new Vector2(2, 2);
+    public float headScaleAdjustment = 0.02f;
 
     [Tooltip("The floor level in posenet Y-%")]
     public float floorLevel = 0;
@@ -134,49 +134,72 @@ public class PoseAvatarInputController : PoseEventHandler {
         Vector2 hipVector = new Vector2();
         hipVector.x = (sum.x / adjustmentMap[pelvisStr].Count);
         hipVector.y = (sum.y / adjustmentMap[pelvisStr].Count);
-        zeroPointAdjustment.x = hipVector.x;
 
         // Handle left foot
         Vector2 leftFootvector = getAverageAdjustmentValue(leftFootStr);
-        zeroPointAdjustment.y = leftFootvector.y;
 
         // Handle right foot
         Vector2 rightFootvector = getAverageAdjustmentValue(rightFootStr);
         floorLevel = (floorLevel + rightFootvector.y) / 2;  // Take average from left & right foot
-        zeroPointAdjustment.y = (zeroPointAdjustment.y + rightFootvector.y) / 2; // Take average from left & right foot
-
-        legScaleAdjustment.y = legLength / (hipVector.y - zeroPointAdjustment.y);
 
         // Handle shoulders
         Vector2 leftShoulderVector = getAverageAdjustmentValue(leftShoulderStr);
         Vector2 rightShoulderVector = getAverageAdjustmentValue(rightShoulderStr);
-        float bodyScale = bodyLength / (leftShoulderVector - hipVector).magnitude;
-        leftShoulderScaleAdjustment = bodyScale * (leftShoulderVector - hipVector);
-        rightShoulderScaleAdjustment = bodyScale * (rightShoulderVector - hipVector);
 
         // Handle hands
         Vector2 leftWristVector = getAverageAdjustmentValue(leftHandStr);
         Vector2 rightWristVector = getAverageAdjustmentValue(rightHandStr);
-        float armScale = armLength / (leftWristVector - leftShoulderVector).magnitude;
-        leftHandScaleAdjustment = armScale * (leftShoulderVector - leftWristVector);
-        rightHandScaleAdjustment = armScale * (rightShoulderVector - rightWristVector);
 
         // Handle head
         Vector2 headVector = getAverageAdjustmentValue(headStr);
-        float headScale = neckLength / (headVector - leftShoulderVector).magnitude;
-        headScaleAdjustment = headScale * (headVector - leftShoulderVector);
+
+        /* Debug code
+        // Standing
+        hipVector = new Vector2(63.8f, 58.4f);
+        leftFootvector = new Vector2(63.5f, 6.9f);
+        rightFootvector = new Vector2(64.8f, 6.9f);
+        leftShoulderVector = new Vector2(62.8f, 88.6f);
+        rightShoulderVector = new Vector2(63.5f, 88.6f);
+        leftWristVector = new Vector2(65.8f, 65.4f);
+        rightWristVector = new Vector2(72.5f, 64.8f);
+        headVector = new Vector2(60.6f, 97.7f);
+
+        /* Sitta på huk
+        hipVector = new Vector2(60.5f, 28.4f);
+        leftFootvector = new Vector2(53.9f, 5.4f);
+        rightFootvector = new Vector2(76.0f, 6.5f);
+        leftShoulderVector = new Vector2(52.9f, 56.7f);
+        rightShoulderVector = new Vector2(69.9f, 58.5f);
+        leftWristVector = new Vector2(37.3f, 55.8f);
+        rightWristVector = new Vector2(83.6f, 55.8f);
+        headVector = new Vector2(61.8f, 72.3f); * /
+        / End - Debug code */
+
+        // Calculate adjustments
+        zeroPointAdjustment.x = hipVector.x;
+        zeroPointAdjustment.y = (leftFootvector.y + rightFootvector.y) / 2; // Take average from left & right foot
+
+        legScaleAdjustment = legLength / (hipVector - zeroPointAdjustment).magnitude;
+
+        leftShoulderScaleAdjustment = bodyLength / (leftShoulderVector - hipVector).magnitude;
+        rightShoulderScaleAdjustment = bodyLength / (rightShoulderVector - hipVector).magnitude;
+
+        leftHandScaleAdjustment = armLength / (leftWristVector - leftShoulderVector).magnitude;
+        rightHandScaleAdjustment = armLength / (rightWristVector - rightShoulderVector).magnitude;
+
+        headScaleAdjustment = neckLength / (headVector - leftShoulderVector).magnitude;
 
         Debug.Log("Adjustment ended");
         Debug.Log("Adjustment base data: hipVector: " + hipVector + ", leftFootvector = " + leftFootvector + ", rightFootvector: " + rightFootvector + ", # of adjustment entries: " + adjustmentMap[pelvisStr].Count);
         Debug.Log("Adjustment base data: leftShoulderVector: " + leftShoulderVector + ", rightShoulderVector = " + rightShoulderVector + ", headVector: " + headVector);
         Debug.Log("Adjustment base data: leftWristVector: " + leftWristVector + ", rightWristVector = " + rightWristVector);
         Debug.Log("Adjustment adaptions: zeroPointAdjustment: " + zeroPointAdjustment);
-        Debug.Log("Adjustment adaptions: legScaleAdjustment = (" + legScaleAdjustment.x + ", " + legScaleAdjustment.y + ")");
-        Debug.Log("Adjustment adaptions: leftShoulderScaleAdjustment = (" + leftShoulderScaleAdjustment.x + ", " + leftShoulderScaleAdjustment.y + ")");
-        Debug.Log("Adjustment adaptions: rightShoulderScaleAdjustment = (" + rightShoulderScaleAdjustment.x + ", " + rightShoulderScaleAdjustment.y + ")");
-        Debug.Log("Adjustment adaptions: leftHandScaleAdjustment = (" + leftHandScaleAdjustment.x + ", " + leftHandScaleAdjustment.y + ")");
-        Debug.Log("Adjustment adaptions: rightHandScaleAdjustment = (" + rightHandScaleAdjustment.x + ", " + rightHandScaleAdjustment.y + ")");
-        Debug.Log("Adjustment adaptions: headScaleAdjustment = (" + headScaleAdjustment.x + ", " + headScaleAdjustment.y + ")");
+        Debug.Log("Adjustment adaptions: legScaleAdjustment = (" + legScaleAdjustment + ")");
+        Debug.Log("Adjustment adaptions: leftShoulderScaleAdjustment = (" + leftShoulderScaleAdjustment + ")");
+        Debug.Log("Adjustment adaptions: rightShoulderScaleAdjustment = (" + rightShoulderScaleAdjustment + ")");
+        Debug.Log("Adjustment adaptions: leftHandScaleAdjustment = (" + leftHandScaleAdjustment + ")");
+        Debug.Log("Adjustment adaptions: rightHandScaleAdjustment = (" + rightHandScaleAdjustment + ")");
+        Debug.Log("Adjustment adaptions: headScaleAdjustment = (" + headScaleAdjustment + ")");
         Vector2 hipV = (hipVector - zeroPointAdjustment) * legScaleAdjustment;
         Debug.Log("Adjustment Test: hip = (" + hipV.x + ", " + hipV.y + ")");
     }
@@ -244,7 +267,7 @@ public class PoseAvatarInputController : PoseEventHandler {
 //        handleNodeMovement(middleSpinePose, middleSpine, ref prevMiddleSpineCoord, "MiddleSpine");
 
         handleLeftShoulderNodeMovement(lastPose.leftShoulder, leftShoulder, ref prevLeftShoulderCoord, "leftShoulder");
-        handleLeftShoulderNodeMovement(lastPose.rightShoulder, rightShoulder, ref prevRightShoulderCoord, "rightShoulder");
+        handleRightShoulderNodeMovement(lastPose.rightShoulder, rightShoulder, ref prevRightShoulderCoord, "rightShoulder");
         handleNodeMovement(lastPose.nose, nose, ref prevNoseCoord, "nose", ref currentHeadPos);
 //        handleNodeMovement(lastPose.leftEye, leftEye, ref prevLeftEyeCoord, "leftEye");
 //        handleNodeMovement(lastPose.rightEye, rightEye, ref prevRightEyeCoord, "rightEye");
@@ -263,13 +286,14 @@ public class PoseAvatarInputController : PoseEventHandler {
     }
 
     private void calculateFloorLevel(PoseEvent pose) {
-        if (floorPercentageLevel > pose.leftAnkle.y) {
-            floorPercentageLevel = pose.leftAnkle.y;
-            Debug.Log("floorPercentageLevel = " + floorPercentageLevel);
+        zeroPointAdjustment.x = pelvisPose.x;
+        if (zeroPointAdjustment.y > pose.leftAnkle.y) {
+            zeroPointAdjustment.y = pose.leftAnkle.y;
+            Debug.Log("zeroPointAdjustment.y = " + zeroPointAdjustment.y);
         }
-        if (floorPercentageLevel > pose.rightAnkle.y) {
-            floorPercentageLevel = pose.rightAnkle.y;
-            Debug.Log("floorPercentageLevel = " + floorPercentageLevel);
+        if (zeroPointAdjustment.y > pose.rightAnkle.y) {
+            zeroPointAdjustment.y = pose.rightAnkle.y;
+            Debug.Log("zeroPointAdjustment.y = " + zeroPointAdjustment.y);
         }
     }
 
@@ -382,6 +406,8 @@ public class PoseAvatarInputController : PoseEventHandler {
         Vector2 currentCoord = (previousCoord - prevLeftShoulderCoord) * leftHandScaleAdjustment + currentLeftShoulderPos;
 
         Debug.Log("New pos for '" + nodeName + "', " + " Pose: " + posePos + " -> After: " + currentCoord);
+        Debug.Log("previousCoord: " + previousCoord + ", prevLeftShoulderCoord: " + prevLeftShoulderCoord);
+        Debug.Log("leftHandScaleAdjustment: " + leftHandScaleAdjustment + ", currentLeftShoulderPos: " + currentLeftShoulderPos);
 
         // Set new position on node
         Transform transform = node.transform;
@@ -406,6 +432,8 @@ public class PoseAvatarInputController : PoseEventHandler {
         Vector2 currentCoord = (previousCoord - prevRightShoulderCoord) * rightHandScaleAdjustment + currentRightShoulderPos;
 
         Debug.Log("New pos for '" + nodeName + "', " + " Pose: " + posePos + " -> After: " + currentCoord);
+        Debug.Log("previousCoord: " + previousCoord + ", prevRightShoulderCoord: " + prevRightShoulderCoord);
+        Debug.Log("rightHandScaleAdjustment: " + rightHandScaleAdjustment + ", currentRightShoulderPos: " + currentRightShoulderPos);
 
         // Set new position on node
         Transform transform = node.transform;

@@ -929,11 +929,12 @@ MonoBehaviour:
   middleSpine: {fileID: 0}
   smoothening: 3
   zeroPointAdjustment: {x: 0, y: 0}
-  legScaleAdjustment: {x: 0.02, y: 2}
-  shoulderScaleAdjustment: {x: 2, y: 2}
-  leftHandScaleAdjustment: {x: 2, y: 2}
-  rightHandScaleAdjustment: {x: 2, y: 2}
-  headScaleAdjustment: {x: 2, y: 2}
+  legScaleAdjustment: 0.02
+  leftShoulderScaleAdjustment: 0.02
+  rightShoulderScaleAdjustment: 0.02
+  leftHandScaleAdjustment: 0.02
+  rightHandScaleAdjustment: 0.02
+  headScaleAdjustment: 0.02
   floorLevel: 0
   legLength: 1.155
   armLength: 0.76
@@ -1160,7 +1161,7 @@ PrefabInstance:
     - target: {fileID: 3531023867771002507, guid: 05b9a7d15d076704488903bbcfc2c860,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1.627
+      value: 2.611
       objectReference: {fileID: 0}
     - target: {fileID: 3531023867771002507, guid: 05b9a7d15d076704488903bbcfc2c860,
         type: 3}
