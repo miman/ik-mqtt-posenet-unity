@@ -64,7 +64,7 @@ namespace PoseClient
         public string clientId = "poseclient-" + Guid.NewGuid().ToString();
 
         // The controller doing something usefull with the input
-        public PoseEventHandler poseEventHandler;
+        public List<PoseEventHandler> poseEventHandlers;
 
         private MqttClient client;
 
@@ -94,9 +94,9 @@ namespace PoseClient
             broadcastProxy.disconnect();
         }
 
-        public void Initialize(PoseEventHandler inputController)
+        public void Initialize(List<PoseEventHandler> inputControllers)
         {
-            poseEventHandler = inputController;
+            poseEventHandlers = inputControllers;
             if (initiated)
             {
                 Debug.Log("MQTT already initiated, ignoring connect call.");
@@ -184,7 +184,9 @@ namespace PoseClient
 //                Debug.Log("Pose event received (ping: " + pingTime + ")");
                 int startIndex = msg.IndexOf("payload\":") + "payload\":".Length;
                 PoseEvent pose = PoseEvent.CreateFromJSON(msg.Substring(startIndex, msg.Length - (startIndex + 1)));
-                poseEventHandler.HandlePoseEvent(pose);
+                foreach(PoseEventHandler handler in poseEventHandlers) {
+                    handler.HandlePoseEvent(pose);
+                }
             }
             else
             {

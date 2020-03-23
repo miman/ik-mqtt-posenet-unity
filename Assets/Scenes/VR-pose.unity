@@ -686,7 +686,8 @@ MonoBehaviour:
   password: 
   isUsingBroadcast: 1
   clientId: ball-catching-game
-  poseEventHandler: {fileID: 1007457738}
+  poseEventHandlers:
+  - {fileID: 1007457738}
 --- !u!4 &694020445
 Transform:
   m_ObjectHideFlags: 0

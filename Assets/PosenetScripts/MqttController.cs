@@ -30,8 +30,7 @@ public class MqttController : MonoBehaviour {
 
     [Header("Pose controller")]
     [Tooltip("The controller doing something usefull with the input")]
-//    public List<PoseEventHandler> poseEventHandlers;
-    public PoseEventHandler poseEventHandler;
+    public List<PoseEventHandler> poseEventHandlers;
 
     private PoseClient.MqttPoseProxy mqttPoseProxy;
 
@@ -53,7 +52,7 @@ public class MqttController : MonoBehaviour {
     void Start()
     {
         Debug.Log("MqttPoseProxy::Start");
-        mqttPoseProxy.Initialize(poseEventHandler);
+        mqttPoseProxy.Initialize(poseEventHandlers);
     }
 
     void OnDestroy()
