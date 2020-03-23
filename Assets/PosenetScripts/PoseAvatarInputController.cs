@@ -26,9 +26,6 @@ public class PoseAvatarInputController : PoseEventHandler {
     [Tooltip("The adjustment for the head related to the left shoulder")]
     public float headScaleAdjustment = 0.02f;
 
-    [Tooltip("The floor level in posenet Y-%")]
-    public float floorLevel = 0;
-
     [Header("% to coordinate factors")]
     [Tooltip("The leg length in game coordinates")]
     public float legLength = 1.155f;
@@ -140,7 +137,6 @@ public class PoseAvatarInputController : PoseEventHandler {
 
         // Handle right foot
         Vector2 rightFootvector = getAverageAdjustmentValue(rightFootStr);
-        floorLevel = (floorLevel + rightFootvector.y) / 2;  // Take average from left & right foot
 
         // Handle shoulders
         Vector2 leftShoulderVector = getAverageAdjustmentValue(leftShoulderStr);
@@ -154,7 +150,6 @@ public class PoseAvatarInputController : PoseEventHandler {
         Vector2 headVector = getAverageAdjustmentValue(headStr);
 
         /* Debug code
-        // Standing
         hipVector = new Vector2(63.8f, 58.4f);
         leftFootvector = new Vector2(63.5f, 6.9f);
         rightFootvector = new Vector2(64.8f, 6.9f);
@@ -163,16 +158,6 @@ public class PoseAvatarInputController : PoseEventHandler {
         leftWristVector = new Vector2(65.8f, 65.4f);
         rightWristVector = new Vector2(72.5f, 64.8f);
         headVector = new Vector2(60.6f, 97.7f);
-
-        /* Sitta på huk
-        hipVector = new Vector2(60.5f, 28.4f);
-        leftFootvector = new Vector2(53.9f, 5.4f);
-        rightFootvector = new Vector2(76.0f, 6.5f);
-        leftShoulderVector = new Vector2(52.9f, 56.7f);
-        rightShoulderVector = new Vector2(69.9f, 58.5f);
-        leftWristVector = new Vector2(37.3f, 55.8f);
-        rightWristVector = new Vector2(83.6f, 55.8f);
-        headVector = new Vector2(61.8f, 72.3f); * /
         / End - Debug code */
 
         // Calculate adjustments
@@ -261,7 +246,7 @@ public class PoseAvatarInputController : PoseEventHandler {
     }
 
     private void handleNewPoseEvent(PoseEvent pose) {
-        calculateFloorLevel(pose);
+//        calculateFloorLevel(pose);
 
         handleNodeMovement(pelvisPose, pelvis, ref prevPelvisCoord, "Pelvis", ref currentPelvisPos);
 //        handleNodeMovement(middleSpinePose, middleSpine, ref prevMiddleSpineCoord, "MiddleSpine");

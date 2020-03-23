@@ -468,6 +468,30 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 360079423}
   m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &416404243 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 100066, guid: 9251f384b071861468e65c0fc55b87e9,
+    type: 3}
+  m_PrefabInstance: {fileID: 1080996733}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &416404245
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 416404243}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 03ca45bb53dc94f478358a1b6475653d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ChainLength: 3
+  Target: {fileID: 75727144}
+  Pole: {fileID: 0}
+  Iterations: 10
+  Delta: 0.001
+  SnapBackStrength: 1
 --- !u!1 &476914357
 GameObject:
   m_ObjectHideFlags: 0
@@ -863,6 +887,30 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 822770789}
   m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &847670635 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 100064, guid: 9251f384b071861468e65c0fc55b87e9,
+    type: 3}
+  m_PrefabInstance: {fileID: 1080996733}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &847670637
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 847670635}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 03ca45bb53dc94f478358a1b6475653d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ChainLength: 3
+  Target: {fileID: 2111084420}
+  Pole: {fileID: 0}
+  Iterations: 10
+  Delta: 0.001
+  SnapBackStrength: 1
 --- !u!1 &1007457736
 GameObject:
   m_ObjectHideFlags: 0
@@ -935,12 +983,11 @@ MonoBehaviour:
   leftHandScaleAdjustment: 0.02
   rightHandScaleAdjustment: 0.02
   headScaleAdjustment: 0.02
-  floorLevel: 0
   legLength: 1.155
-  armLength: 0.76
-  bodyLength: 0.626
-  neckLength: 0.277
-  secsForAdjustment: 5
+  armLength: 0.8
+  bodyLength: 0.55
+  neckLength: 0.2
+  secsForAdjustment: 3
   avatar: {fileID: 1007457736}
 --- !u!1001 &1080996733
 PrefabInstance:
