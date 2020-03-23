@@ -4,29 +4,31 @@ using UnityEngine;
 using System;
 
 /**
- * Uses Posenet input to send control commands to the game
+ * Uses Posenet input to control an avatar body parts.
+ * It ajdusts the input data with the avatar body layout based on the given input
+ * 
+ * It assumes the player will stand still for secsForAdjustment number of seconds for it to adjust the ground level & body size adjustments.
+ * 
  */
 public class PoseAvatarInputController : PoseEventHandler {
 
-    [Header("% to coordinate factors")]
-
     [Tooltip("The adjustment vector for what (0,0) is in %")]
-    public Vector2 zeroPointAdjustment;
+    private Vector2 zeroPointAdjustment;
     [Tooltip("The adjustment for going from % to game coordinates")]
-    public float legScaleAdjustment = 0.02f;
+    private float legScaleAdjustment = 0.02f;
     [Tooltip("The adjustment for going from % to game coordinates")]
-    public float leftShoulderScaleAdjustment = 0.02f;
+    private float leftShoulderScaleAdjustment = 0.02f;
     [Tooltip("The adjustment for going from % to game coordinates")]
-    public float rightShoulderScaleAdjustment = 0.02f;
+    private float rightShoulderScaleAdjustment = 0.02f;
     [Tooltip("The adjustment for going from % to game coordinates")]
-    public float shoulderWidthScaleAdjustment = 0.02f;
+    private float shoulderWidthScaleAdjustment = 0.02f;
 
     [Tooltip("The adjustment for the left hand related to the left shoulder")]
-    public float leftHandScaleAdjustment = 0.02f;
+    private float leftHandScaleAdjustment = 0.02f;
     [Tooltip("The adjustment for the right hand related to the right shoulder")]
-    public float rightHandScaleAdjustment = 0.02f;
+    private float rightHandScaleAdjustment = 0.02f;
     [Tooltip("The adjustment for the head related to the left shoulder")]
-    public float headScaleAdjustment = 0.02f;
+    private float headScaleAdjustment = 0.02f;
 
     [Header("% to coordinate factors")]
     [Tooltip("The leg length in game coordinates")]
@@ -42,9 +44,6 @@ public class PoseAvatarInputController : PoseEventHandler {
 
     [Tooltip("# Secs for initial factor adjustment")]
     public float secsForAdjustment = 5;
-
-    [Tooltip("Avatar")]
-    public GameObject avatar;
 
     /**
      * This is the percentage value received from PoseNet that we say is the floor level
