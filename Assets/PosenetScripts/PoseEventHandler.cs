@@ -72,7 +72,7 @@ public class PoseEventHandler: MonoBehaviour {
     }
 
     /**
-     * Initializes the previous coordinates
+     * Initializes the previous coordinates to the given x/y values
      */
     protected void initPrevCoords(float xFactor, float yFactor) {
         prevNoseCoord = new Vector2(xFactor, yFactor);

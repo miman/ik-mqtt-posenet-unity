@@ -6,6 +6,8 @@ using System;
 /**
  * Uses Posenet input to control an avatar body parts.
  * It ajdusts the input data with the avatar body layout based on the given input
+ * This script will try to control reference points for each body part. 
+ * It will try to calculate the pose-value vs body size in the app ratio & location and then use this to place the reference points in the corrrect place.
  * 
  * It assumes the player will stand still for secsForAdjustment number of seconds for it to adjust the ground level & body size adjustments.
  * 

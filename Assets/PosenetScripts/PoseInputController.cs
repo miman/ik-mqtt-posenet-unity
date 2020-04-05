@@ -5,6 +5,10 @@ using System;
 
 /**
  * Uses Posenet input to set the position of the gameobjects set in this script mapped to the correct body part.
+ * This script which will give each body part a 0-100% value for the X&Y values based on the camera screen.
+ * The start point is bottom-left = (0 %,0 %) & upper-right = (100 %, 100 %)
+ * 
+ * The height & width size factor will be used to recalculate the % values to correct game coordinates
  */
 public class PoseInputController : PoseEventHandler, CameraDimensionObserver {
 
@@ -24,6 +28,10 @@ public class PoseInputController : PoseEventHandler, CameraDimensionObserver {
      */
     private Vector2 cameraDimension;
 
+    /**
+     * Called at startup.
+     * Here we initiallize all values
+     */
     public void Awake() {
         DontDestroyOnLoad(this);
 
@@ -49,6 +57,9 @@ public class PoseInputController : PoseEventHandler, CameraDimensionObserver {
         maxMinCoordMap.Add("rightAnkle", new MaxMinCoord());
     }
 
+    /**
+     * Called each frame to update the view
+     */
     void Update()
     {
         if (lastPose != null)
@@ -90,7 +101,10 @@ public class PoseInputController : PoseEventHandler, CameraDimensionObserver {
 
     /**
      * Act on node movement
-     * Value can be [0 - 600]
+     * param name="posePos" The new position value for this node
+     * param name="node"    The node this new position is for
+     * param name="previousCoord"   The previous coordinates for this node (this will be updated by the function to the new last values, that is the current)
+     * param name="desc"    The description of the node (used for logging)
      */
     private void handleNodeMovement(PosePosition posePos, GameObject node, ref Vector2 previousCoord, string desc)
     {
@@ -128,6 +142,8 @@ public class PoseInputController : PoseEventHandler, CameraDimensionObserver {
 
     /**
      * Converts screen percentage to actual Unity screen pixels.
+     * param name="posePos" A position in %
+     * returns  The position in game coordinates
      */
     private Vector2 convertPercentageToPixels(PosePosition posePos)
     {
@@ -140,9 +156,13 @@ public class PoseInputController : PoseEventHandler, CameraDimensionObserver {
         return coord;
     }
 
+    /**
+     * Used to set the width/height size factors to calcualte the game coordinates correctly.
+     * Set this based on the value at where tha avatar is (usually not the same as the camera)
+    */
     public void cameraDimensionsChanged(Vector3 viewBottomLeft, Vector3 viewTopRight, float viewWidth, float viewHeight)
     {
-        Debug.Log("New camera dimensions received by PoseInputController  [ width: " + viewWidth + ", height: " + viewHeight + ")");
+        Debug.Log("New camera dimensions set in PoseInputController  [ width: " + viewWidth + ", height: " + viewHeight + ")");
         widthSizeFactor = viewWidth;
         heightSizeFactor = viewHeight;
     }
