@@ -703,7 +703,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1fd0e2d9ae921cd4e9ed2d7d1c60e726, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  brokerAddress: mqtt.thorman.eu
+  brokerAddress: devhost
   brokerPort: 1883
   isEncrypted: 0
   username: 
