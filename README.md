@@ -24,3 +24,20 @@ The "VR-pose" scene is used to visualize how to use the library that controls a 
 It uses the "PoseAvatarInputController" script which will try to control reference points for each body part.
 It will try to calculate the pose-value vs body size in the app ratio & location and then use this to place the reference points in the corrrect place.
 
+# Howto Use the scripts
+
+## Steps to do
+To enable you to control game objects in a scene you need to do the following steps.
+
+1. Create an empty game object (called for example "MqttConnection")
+2. Drag the MqttController script into this controller.
+3. Configure the script to communicate with a specific MQTT server in One of these 2 ways
+    3a. Check "Is using broadcast", then the component will try to find the server using the broadcasts mechanism
+    3b. Uncheck "Is using broadcast", then the component will connect to the server you specify
+4. Create empty game object (called for example "Player")
+5. Drag the script "PoseAvatarInputController" OR "PoseInputController" to this object
+6. increase the size of event handlers to 1 in the MqttConnection
+7. Drag this "player" component to the MqttController as an event handler
+8. Create the game objects you want to control & drag these to the correct body part in the Player object
+9. The body parts hould now mova according to your body movements
+

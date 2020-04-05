@@ -31,8 +31,20 @@ public class PoseInputController : PoseEventHandler, CameraDimensionObserver {
         initPrevCoords(widthSizeFactor, heightSizeFactor);
 
         maxMinCoordMap.Add("nose", new MaxMinCoord());
+        maxMinCoordMap.Add("leftEye", new MaxMinCoord());
+        maxMinCoordMap.Add("rightEye", new MaxMinCoord());
+        maxMinCoordMap.Add("leftEar", new MaxMinCoord());
+        maxMinCoordMap.Add("rightEar", new MaxMinCoord());
+        maxMinCoordMap.Add("leftShoulder", new MaxMinCoord());
+        maxMinCoordMap.Add("rightShoulder", new MaxMinCoord());
+        maxMinCoordMap.Add("leftElbow", new MaxMinCoord());
+        maxMinCoordMap.Add("rightElbow", new MaxMinCoord());
         maxMinCoordMap.Add("leftWrist", new MaxMinCoord());
         maxMinCoordMap.Add("rightWrist", new MaxMinCoord());
+        maxMinCoordMap.Add("leftHip", new MaxMinCoord());
+        maxMinCoordMap.Add("rightHip", new MaxMinCoord());
+        maxMinCoordMap.Add("leftKnee", new MaxMinCoord());
+        maxMinCoordMap.Add("rightKnee", new MaxMinCoord());
         maxMinCoordMap.Add("leftAnkle", new MaxMinCoord());
         maxMinCoordMap.Add("rightAnkle", new MaxMinCoord());
     }
