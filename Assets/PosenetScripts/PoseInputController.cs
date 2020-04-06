@@ -10,13 +10,25 @@ using System;
  * 
  * The height & width size factor will be used to recalculate the % values to correct game coordinates
  */
-public class PoseInputController : PoseEventHandler, CameraDimensionObserver {
+public class PoseInputController : PoseEventHandler {
 
     [Header("Tracking boundary factor")]
     [Tooltip("The width factor the 100% should be recalculated to")]
     public float widthSizeFactor = 100;
     [Tooltip("The height factor the 100% should be recalculated to")]
     public float heightSizeFactor = 100;
+
+    [Header("Camera")]
+    public Camera cam;
+
+    [Tooltip("Offset the player is in front of the camera")]
+    public float playerZOffset = 20;
+
+    /**
+     * The last known screen width & height, used for knowing when the screen dimensions have changed
+     */
+    private float viewWidth = 0.0f;
+    private float viewHeight = 0.0f;
 
     /**
      * To keep track of max min values of tracking.
@@ -57,11 +69,17 @@ public class PoseInputController : PoseEventHandler, CameraDimensionObserver {
         maxMinCoordMap.Add("rightAnkle", new MaxMinCoord());
     }
 
+    public void Start() {
+        handleCameraDimensions();
+    }
+
     /**
      * Called each frame to update the view
      */
     void Update()
     {
+        handleCameraDimensions();
+
         if (lastPose != null)
         {   // act on last pose-event
             handleNodeMovement(lastPose.nose, nose, ref prevNoseCoord, "nose");
@@ -127,17 +145,19 @@ public class PoseInputController : PoseEventHandler, CameraDimensionObserver {
         delta = currentCoord.y - previousCoord.y;
         currentCoord.y = previousCoord.y + (delta / smoothening);
 
-//        Debug.Log(desc + " [x:" + posePos.x + ", y: " + posePos.y + "] -> [x: " + currentCoord.x + ", y: " + currentCoord.y + "]. (xOffset: " + xOffset + ", yOffset: " + yOffset + ")");
 
         previousCoord.x = currentCoord.x;
         previousCoord.y = currentCoord.y;
         // Add offset
-//        currentCoord.x = currentCoord.x + xOffset;
-//        currentCoord.y = currentCoord.y + yOffset;
-        Debug.Log("Offset added, " + " Before: [x:" + previousCoord.x + ", y: " + previousCoord.y + "] -> After: [x: " + currentCoord.x + ", y: " + currentCoord.y + "]");
+        //        currentCoord.x = currentCoord.x + xOffset;
+        //        currentCoord.y = currentCoord.y + yOffset;
+        if (desc == "leftWrist" || desc == "rightWrist") {
+            Debug.Log("Pos for " + desc + ": posePos: " + posePos + " -> currentCoord: " + currentCoord);
+        }
 
         Transform transform = node.transform;
         transform.localPosition = new Vector3(currentCoord.x, currentCoord.y, transform.localPosition.z);
+//        transform.position = new Vector3(currentCoord.x, currentCoord.y, transform.position.z);
     }
 
     /**
@@ -160,10 +180,40 @@ public class PoseInputController : PoseEventHandler, CameraDimensionObserver {
      * Used to set the width/height size factors to calcualte the game coordinates correctly.
      * Set this based on the value at where tha avatar is (usually not the same as the camera)
     */
-    public void cameraDimensionsChanged(Vector3 viewBottomLeft, Vector3 viewTopRight, float viewWidth, float viewHeight)
+    private void cameraDimensionsChanged(Vector3 viewBottomLeft, Vector3 viewTopRight, float viewWidth, float viewHeight)
     {
         Debug.Log("New camera dimensions set in PoseInputController  [ width: " + viewWidth + ", height: " + viewHeight + ")");
         widthSizeFactor = viewWidth;
         heightSizeFactor = viewHeight;
     }
+
+    /**
+     * Retrieves the camera size and changes the player offset & pose-scaling based on this.
+     * The player should be located in the middle of the camera
+     */
+    private void handleCameraDimensions() {
+        Vector3 bottomLeft = cam.ViewportToWorldPoint(new Vector3(0, 0, playerZOffset));
+        Vector3 topRight = cam.ViewportToWorldPoint(new Vector3(1, 1, playerZOffset));
+        float newViewWidth = topRight.x - bottomLeft.x;
+        float newViewHeight = topRight.y - bottomLeft.y;
+        if ((Math.Abs(viewWidth - newViewWidth) > 0.01) || (Math.Abs(viewHeight - newViewHeight) > 0.01)) {
+            // The camera dimensions changed -> handle change
+            Debug.Log("Screen bottomLeft: " + bottomLeft + ", topRight: " + topRight);
+            viewWidth = newViewWidth;
+            viewHeight = newViewHeight;
+            Debug.Log("Camera [width: " + viewWidth + ", height: " + viewHeight + "]");
+
+            // Now set the player location to be located in the middle of the camera, but a little bit in front of it
+            float x = bottomLeft.x; // + (viewWidth / 2);
+            float y = bottomLeft.y; // + (viewHeight / 2);
+            float z = cam.transform.position.z + playerZOffset;
+            Debug.Log("Player location is set to [x: " + x + ", y: " + y + ", z: " + z + "]");
+            //            Transform transform = player.transform;
+            // transform.localPosition = new Vector3(x, y, z);
+            transform.position = new Vector3(x, y, z);
+
+            cameraDimensionsChanged(bottomLeft, topRight, viewWidth, viewHeight);
+        }
+    }
+
 }
