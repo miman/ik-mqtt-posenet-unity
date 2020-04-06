@@ -157,7 +157,6 @@ public class PoseInputController : PoseEventHandler {
 
         Transform transform = node.transform;
         transform.localPosition = new Vector3(currentCoord.x, currentCoord.y, transform.localPosition.z);
-//        transform.position = new Vector3(currentCoord.x, currentCoord.y, transform.position.z);
     }
 
     /**
@@ -185,6 +184,12 @@ public class PoseInputController : PoseEventHandler {
         Debug.Log("New camera dimensions set in PoseInputController  [ width: " + viewWidth + ", height: " + viewHeight + ")");
         widthSizeFactor = viewWidth;
         heightSizeFactor = viewHeight;
+
+/*        Test code to test edges
+        Transform transform = leftWrist.transform;
+        transform.localPosition = new Vector3(0, 0, transform.localPosition.z);
+        transform = rightWrist.transform;
+        transform.localPosition = new Vector3(widthSizeFactor, heightSizeFactor, transform.localPosition.z)*/
     }
 
     /**
