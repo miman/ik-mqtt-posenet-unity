@@ -67,6 +67,9 @@ public class PoseInputController : PoseEventHandler {
         maxMinCoordMap.Add("rightKnee", new MaxMinCoord());
         maxMinCoordMap.Add("leftAnkle", new MaxMinCoord());
         maxMinCoordMap.Add("rightAnkle", new MaxMinCoord());
+
+        maxMinCoordMap.Add("Pelvis", new MaxMinCoord());
+        maxMinCoordMap.Add("MiddleSpine", new MaxMinCoord());
     }
 
     public void Start() {

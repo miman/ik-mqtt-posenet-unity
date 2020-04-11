@@ -98,9 +98,6 @@ public class PoseAvatarInputController : PoseEventHandler {
     }
 
     void Update() {
-        if (lastPose != null) {
-            calculateCalculatedNodes(lastPose);
-        }
         if (adjusting) {
             if (System.DateTime.Now.CompareTo(adjustmentEndTime) > 0) {
                 // Adjustment time has ended
@@ -212,8 +209,8 @@ public class PoseAvatarInputController : PoseEventHandler {
      */
     private void readAdjustmentInfo() {
         // Still adjusting
-        if (pelvisPose != null) {
-            adjustmentMap[pelvisStr].Add(pelvisPose);
+        if (lastPose.pelvisPose != null) {
+            adjustmentMap[pelvisStr].Add(lastPose.pelvisPose);
         }
 
         if (lastPose.leftAnkle != null) {
@@ -253,10 +250,10 @@ public class PoseAvatarInputController : PoseEventHandler {
         }
     }
 
-    private void handleNewPoseEvent(PoseEvent pose) {
+    private void handleNewPoseEvent(BodyPositionState pose) {
 //        calculateFloorLevel(pose);
 
-        handleNodeMovement(pelvisPose, pelvis, ref prevPelvisCoord, "Pelvis", ref currentPelvisPos);
+        handleNodeMovement(lastPose.pelvisPose, pelvis, ref prevPelvisCoord, "Pelvis", ref currentPelvisPos);
 //        handleNodeMovement(middleSpinePose, middleSpine, ref prevMiddleSpineCoord, "MiddleSpine");
 
         handleLeftShoulderNodeMovement(lastPose.leftShoulder, leftShoulder, ref prevLeftShoulderCoord, "leftShoulder");
@@ -279,7 +276,7 @@ public class PoseAvatarInputController : PoseEventHandler {
     }
 
     private void calculateFloorLevel(PoseEvent pose) {
-        zeroPointAdjustment.x = pelvisPose.x;
+        zeroPointAdjustment.x = lastPose.pelvisPose.x;
         if (zeroPointAdjustment.y > pose.leftAnkle.y) {
             zeroPointAdjustment.y = pose.leftAnkle.y;
             Debug.Log("zeroPointAdjustment.y = " + zeroPointAdjustment.y);

@@ -1,5 +1,8 @@
 ﻿using UnityEngine;
 
+/**
+ * This handler will receive all pose events and will update the positions of the related GameObjects that has been assigned to it.
+ */
 public class PoseEventHandler: MonoBehaviour {
     [Header("GameObject body mapping")]
     public GameObject nose = null;
@@ -28,9 +31,9 @@ public class PoseEventHandler: MonoBehaviour {
     /**
     * Last received posenet event, that is unprocessed
     */
-    protected PoseEvent lastPose = null;
+    protected BodyPositionState lastPose = null;
     // Last posenet event that has been processed
-    protected PoseEvent processedPose = null;
+    protected BodyPositionState processedPose = null;
 
     [Tooltip("Smoothening om movements to avoid jerkiness")]
     public float smoothening = 10;
@@ -59,16 +62,23 @@ public class PoseEventHandler: MonoBehaviour {
     protected Vector2 prevPelvisCoord;
     protected Vector2 prevMiddleSpineCoord;
 
-    protected PosePosition pelvisPose;
-    protected PosePosition middleSpinePose;
+    void OnEnable() {
+        PoseCoreEventManager.onPoseEventReceived += onPoseEventReceived;
+        Debug.Log("PoseEventHandler::onPoseEventReceived enabled");
+    }
+
+
+    void OnDisable() {
+        PoseCoreEventManager.onPoseEventReceived -= onPoseEventReceived;
+        Debug.Log("PoseEventHandler::onPoseEventReceived disabled");
+    }
 
     /**
-     * A new posenet event was received
+     * This event handler will be called every time a new pose is received
      */
-    public void HandlePoseEvent(PoseEvent pose) {
-//        Debug.Log("PoseEvent handled by PoseEventHandler");
+    private void onPoseEventReceived(BodyPositionState pose) {
+        // Debug.Log("PoseEvent handled by PoseEventHandler");
         lastPose = pose;
-        calculateCalculatedNodes(lastPose);
     }
 
     /**
@@ -95,17 +105,5 @@ public class PoseEventHandler: MonoBehaviour {
 
         prevPelvisCoord = new Vector2(xFactor, yFactor);
         prevMiddleSpineCoord = new Vector2(xFactor, yFactor);
-    }
-
-    /**
-     * Calculates the pelvis & middleSpine positions based on the other points
-     */
-    protected void calculateCalculatedNodes(PoseEvent newPose) {
-        pelvisPose = new PosePosition();
-        pelvisPose.x = (newPose.rightHip.x + newPose.leftHip.x) / 2;
-        pelvisPose.y = (newPose.rightHip.y + newPose.leftHip.y) / 2;
-        middleSpinePose = new PosePosition();
-        middleSpinePose.x = (newPose.rightHip.x + newPose.leftShoulder.x) / 2;
-        middleSpinePose.y = (newPose.leftShoulder.y + newPose.leftHip.y) / 2;
     }
 }

@@ -29,8 +29,11 @@ public class MqttController : MonoBehaviour {
     public string clientId = "poseclient-" + Guid.NewGuid().ToString();
 
     [Header("Pose controller")]
-    [Tooltip("The controller doing something usefull with the input")]
-    public List<PoseEventHandler> poseEventHandlers;
+    /**
+     * A pose core event manager routing pose events to subscribers
+     */
+    [Tooltip("The Pose Core event manager routing pose info  to handlers")]
+    public PoseCoreEventManager poseCoreEventManager = null;
 
     private PoseClient.MqttPoseProxy mqttPoseProxy;
 
@@ -52,7 +55,7 @@ public class MqttController : MonoBehaviour {
     void Start()
     {
         Debug.Log("MqttPoseProxy::Start");
-        mqttPoseProxy.Initialize(poseEventHandlers);
+        mqttPoseProxy.Initialize(poseCoreEventManager);
     }
 
     void OnDestroy()
