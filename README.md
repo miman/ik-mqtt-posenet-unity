@@ -37,7 +37,7 @@ To enable you to control game objects in a scene you need to do the following st
 4. Create empty game object (called for example "Player")
 5. Drag the script "PoseAvatarInputController" OR "PoseInputController" to this object
 6. increase the size of event handlers to 1 in the MqttConnection
-7. Drag this "player" component to the MqttController as an event handler
+7. Create an Empty GameObject called for example PoseEventMgr & drag the script PoseCoreEventManager into this object
 8. Create the game objects you want to control & drag these to the correct body part in the Player object
 9. The body parts hould now mova according to your body movements
 
