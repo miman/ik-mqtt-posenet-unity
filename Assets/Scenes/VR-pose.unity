@@ -994,8 +994,8 @@ MonoBehaviour:
   rightHip: {fileID: 0}
   leftKnee: {fileID: 0}
   rightKnee: {fileID: 0}
-  leftAnkle: {fileID: 36761172}
-  rightAnkle: {fileID: 1909682416}
+  leftFoot: {fileID: 36761172}
+  rightFoot: {fileID: 1909682416}
   pelvis: {fileID: 360079423}
   middleSpine: {fileID: 0}
   smoothening: 1
@@ -1613,8 +1613,8 @@ MonoBehaviour:
   rightHip: {fileID: 0}
   leftKnee: {fileID: 0}
   rightKnee: {fileID: 0}
-  leftAnkle: {fileID: 1909682416}
-  rightAnkle: {fileID: 36761172}
+  leftFoot: {fileID: 36761172}
+  rightFoot: {fileID: 1909682416}
   pelvis: {fileID: 360079423}
   middleSpine: {fileID: 0}
   smoothening: 10
