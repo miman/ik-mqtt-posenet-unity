@@ -213,15 +213,15 @@ public class PoseAvatarInputController : PoseEventHandler {
             adjustmentMap[pelvisStr].Add(lastPose.pelvisPose);
         }
 
-        if (lastPose.leftAnkle != null) {
-            adjustmentMap[leftFootStr].Add(lastPose.leftAnkle);
+        if (lastPose.leftFoot != null) {
+            adjustmentMap[leftFootStr].Add(lastPose.leftFoot);
         } else {
-            Debug.Log("lastPose.leftAnkle == null !!!");
+            Debug.Log("lastPose.leftFoot == null !!!");
         }
-        if (lastPose.rightAnkle != null) {
-            adjustmentMap[rightFootStr].Add(lastPose.rightAnkle);
+        if (lastPose.rightFoot != null) {
+            adjustmentMap[rightFootStr].Add(lastPose.rightFoot);
         } else {
-            Debug.Log("lastPose.rightAnkle == null !!!");
+            Debug.Log("lastPose.rightFoot == null !!!");
         }
         if (lastPose.rightShoulder != null) {
             adjustmentMap[rightShoulderStr].Add(lastPose.rightShoulder);
@@ -271,18 +271,18 @@ public class PoseAvatarInputController : PoseEventHandler {
 //        handleNodeMovement(lastPose.rightHip, rightHip, ref prevRightHipCoord, "rightHip");
 //        handleNodeMovement(lastPose.leftKnee, leftKnee, ref prevLeftKneeCoord, "leftKnee");
 //        handleNodeMovement(lastPose.rightKnee, rightKnee, ref prevRightKneeCoord, "rightKnee");
-        handleNodeMovement(lastPose.leftAnkle, leftAnkle, ref prevLeftAnkleCoord, "leftAnkle", ref currentLeftFootPos);
-        handleNodeMovement(lastPose.rightAnkle, rightAnkle, ref prevRightAnkleCoord, "rightAnkle", ref currentRightFootPos);
+        handleNodeMovement(lastPose.leftFoot, leftFoot, ref prevLeftFootCoord, "leftFoot", ref currentLeftFootPos);
+        handleNodeMovement(lastPose.rightFoot, rightFoot, ref prevRightFootCoord, "rightFoot", ref currentRightFootPos);
     }
 
     private void calculateFloorLevel(PoseEvent pose) {
         zeroPointAdjustment.x = lastPose.pelvisPose.x;
-        if (zeroPointAdjustment.y > pose.leftAnkle.y) {
-            zeroPointAdjustment.y = pose.leftAnkle.y;
+        if (zeroPointAdjustment.y > pose.leftFoot.y) {
+            zeroPointAdjustment.y = pose.leftFoot.y;
             Debug.Log("zeroPointAdjustment.y = " + zeroPointAdjustment.y);
         }
-        if (zeroPointAdjustment.y > pose.rightAnkle.y) {
-            zeroPointAdjustment.y = pose.rightAnkle.y;
+        if (zeroPointAdjustment.y > pose.rightFoot.y) {
+            zeroPointAdjustment.y = pose.rightFoot.y;
             Debug.Log("zeroPointAdjustment.y = " + zeroPointAdjustment.y);
         }
     }

@@ -117,10 +117,10 @@ public class PoseCoreEventManager : MonoBehaviour {
             onRightKneePoseEventReceived(pose.rightKnee);
         }
         if (onLeftAnklePoseEventReceived != null) {
-            onLeftAnklePoseEventReceived(pose.leftAnkle);
+            onLeftAnklePoseEventReceived(pose.leftFoot);
         }
         if (onRightAnklePoseEventReceived != null) {
-            onRightAnklePoseEventReceived(pose.rightAnkle);
+            onRightAnklePoseEventReceived(pose.rightFoot);
         }
 
         if (onPelvisPoseEventReceived != null) {

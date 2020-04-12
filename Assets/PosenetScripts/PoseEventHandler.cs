@@ -20,8 +20,8 @@ public class PoseEventHandler: MonoBehaviour {
     public GameObject rightHip = null;
     public GameObject leftKnee = null;
     public GameObject rightKnee = null;
-    public GameObject leftAnkle = null;
-    public GameObject rightAnkle = null;
+    public GameObject leftFoot = null;
+    public GameObject rightFoot = null;
 
     [Header("Calculated locations")]
     // Calculated
@@ -56,8 +56,8 @@ public class PoseEventHandler: MonoBehaviour {
     protected Vector2 prevRightHipCoord;
     protected Vector2 prevLeftKneeCoord;
     protected Vector2 prevRightKneeCoord;
-    protected Vector2 prevLeftAnkleCoord;
-    protected Vector2 prevRightAnkleCoord;
+    protected Vector2 prevLeftFootCoord;
+    protected Vector2 prevRightFootCoord;
 
     protected Vector2 prevPelvisCoord;
     protected Vector2 prevMiddleSpineCoord;
@@ -100,8 +100,8 @@ public class PoseEventHandler: MonoBehaviour {
         prevRightHipCoord = new Vector2(xFactor, yFactor);
         prevLeftKneeCoord = new Vector2(xFactor, yFactor);
         prevRightKneeCoord = new Vector2(xFactor, yFactor);
-        prevLeftAnkleCoord = new Vector2(xFactor, yFactor);
-        prevRightAnkleCoord = new Vector2(xFactor, yFactor);
+        prevLeftFootCoord = new Vector2(xFactor, yFactor);
+        prevRightFootCoord = new Vector2(xFactor, yFactor);
 
         prevPelvisCoord = new Vector2(xFactor, yFactor);
         prevMiddleSpineCoord = new Vector2(xFactor, yFactor);

@@ -19,15 +19,15 @@ public class BodyPositionState {
     public PosePosition rightHip;
     public PosePosition leftKnee;
     public PosePosition rightKnee;
-    public PosePosition leftAnkle;
-    public PosePosition rightAnkle;
+    public PosePosition leftFoot;
+    public PosePosition rightFoot;
     public PosePosition pelvisPose;
     public PosePosition middleSpinePose;
 
     public BodyPositionState(PoseEvent poseEvent, PosePosition pelvisPose, PosePosition middleSpinePose) {
         this.nose = poseEvent.nose;
-        this.leftAnkle = poseEvent.leftAnkle;
-        this.rightAnkle = poseEvent.rightAnkle;
+        this.leftFoot = poseEvent.leftFoot;
+        this.rightFoot = poseEvent.rightFoot;
         this.leftEar = poseEvent.leftEar;
         this.rightEar = poseEvent.rightEar;
         this.leftElbow = poseEvent.leftElbow;
@@ -48,8 +48,8 @@ public class BodyPositionState {
 
     public BodyPositionState() {
         this.nose = new PosePosition();
-        this.leftAnkle = new PosePosition();
-        this.rightAnkle = new PosePosition();
+        this.leftFoot = new PosePosition();
+        this.rightFoot = new PosePosition();
         this.leftEar = new PosePosition();
         this.rightEar = new PosePosition();
         this.leftElbow = new PosePosition();
@@ -70,8 +70,8 @@ public class BodyPositionState {
 
     public void set(PoseEvent poseEvent, PosePosition pelvisPose, PosePosition middleSpinePose) {
         this.nose = poseEvent.nose;
-        this.leftAnkle = poseEvent.leftAnkle;
-        this.rightAnkle = poseEvent.rightAnkle;
+        this.leftFoot = poseEvent.leftFoot;
+        this.rightFoot = poseEvent.rightFoot;
         this.leftEar = poseEvent.leftEar;
         this.rightEar = poseEvent.rightEar;
         this.leftElbow = poseEvent.leftElbow;

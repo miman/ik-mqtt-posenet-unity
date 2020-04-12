@@ -65,8 +65,8 @@ public class PoseInputController : PoseEventHandler {
         maxMinCoordMap.Add("rightHip", new MaxMinCoord());
         maxMinCoordMap.Add("leftKnee", new MaxMinCoord());
         maxMinCoordMap.Add("rightKnee", new MaxMinCoord());
-        maxMinCoordMap.Add("leftAnkle", new MaxMinCoord());
-        maxMinCoordMap.Add("rightAnkle", new MaxMinCoord());
+        maxMinCoordMap.Add("leftFoot", new MaxMinCoord());
+        maxMinCoordMap.Add("rightFoot", new MaxMinCoord());
 
         maxMinCoordMap.Add("Pelvis", new MaxMinCoord());
         maxMinCoordMap.Add("MiddleSpine", new MaxMinCoord());
@@ -100,8 +100,8 @@ public class PoseInputController : PoseEventHandler {
             handleNodeMovement(lastPose.rightHip, rightHip, ref prevRightHipCoord, "rightHip");
             handleNodeMovement(lastPose.leftKnee, leftKnee, ref prevLeftKneeCoord, "leftKnee");
             handleNodeMovement(lastPose.rightKnee, rightKnee, ref prevRightKneeCoord, "rightKnee");
-            handleNodeMovement(lastPose.leftAnkle, leftAnkle, ref prevLeftAnkleCoord, "leftAnkle");
-            handleNodeMovement(lastPose.rightAnkle, rightAnkle, ref prevRightAnkleCoord, "rightAnkle");
+            handleNodeMovement(lastPose.leftFoot, leftFoot, ref prevLeftFootCoord, "leftFoot");
+            handleNodeMovement(lastPose.rightFoot, rightFoot, ref prevRightFootCoord, "rightFoot");
 
             PosePosition pelvisPose = new PosePosition();
             pelvisPose.x = (lastPose.rightHip.x + lastPose.leftHip.x)/2;
