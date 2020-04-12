@@ -110,6 +110,28 @@ public class PoseEvent {
     public PosePosition leftToes;
     public PosePosition leftToesEnd;
 
+    // ================================================
+    // Describing the rotation of an object
+    public Rotation noseRotation;
+    public Rotation headRotation;
+    public Rotation leftEyeRotation;
+    public Rotation rightEyeRotation;
+    public Rotation leftEarRotation;
+    public Rotation rightEarRotation;
+    public Rotation leftShoulderRotation;
+    public Rotation rightShoulderRotation;
+    public Rotation leftElbowRotation;
+    public Rotation rightElbowRotation;
+    public Rotation leftWristRotation;
+    public Rotation rightWristRotation;
+    public Rotation rootRotation;
+    public Rotation leftHipRotation;
+    public Rotation rightHipRotation;
+    public Rotation leftKneeRotation;
+    public Rotation rightKneeRotation;
+    public Rotation leftFootRotation;
+    public Rotation rightFootRotation;
+
     public static PoseEvent CreateFromJSON(string jsonString)
     {
         return JsonUtility.FromJson<PoseEvent>(jsonString);
