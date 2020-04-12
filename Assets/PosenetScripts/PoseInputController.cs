@@ -68,7 +68,7 @@ public class PoseInputController : PoseEventHandler {
         maxMinCoordMap.Add("leftFoot", new MaxMinCoord());
         maxMinCoordMap.Add("rightFoot", new MaxMinCoord());
 
-        maxMinCoordMap.Add("Pelvis", new MaxMinCoord());
+        maxMinCoordMap.Add("Root", new MaxMinCoord());
         maxMinCoordMap.Add("MiddleSpine", new MaxMinCoord());
     }
 
@@ -109,7 +109,7 @@ public class PoseInputController : PoseEventHandler {
             PosePosition middleSpinePose = new PosePosition();
             middleSpinePose.x = (lastPose.rightHip.x + lastPose.leftShoulder.x) / 2;
             middleSpinePose.y = (lastPose.leftShoulder.y + lastPose.leftHip.y) / 2;
-            handleNodeMovement(pelvisPose, pelvis, ref prevPelvisCoord, "Pelvis");
+            handleNodeMovement(pelvisPose, root, ref prevRootCoord, "Root");
             handleNodeMovement(middleSpinePose, middleSpine, ref prevMiddleSpineCoord, "MiddleSpine");
 
             processedPose = lastPose;

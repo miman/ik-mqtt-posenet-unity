@@ -45,13 +45,10 @@ public class PoseCoreEventManager : MonoBehaviour {
     public delegate void RightAnklePoseEventAction(PosePosition pos);
     public static event RightAnklePoseEventAction onRightAnklePoseEventReceived;
 
-    public delegate void PelvisPoseEventAction(PosePosition pos);
-    public static event PelvisPoseEventAction onPelvisPoseEventReceived;
+    public delegate void RootPoseEventAction(PosePosition pos);
+    public static event RootPoseEventAction onRootPoseEventReceived;
     public delegate void MiddleSpinePoseEventAction(PosePosition pos);
     public static event MiddleSpinePoseEventAction onMiddleSpinePoseEventReceived;
-
-    protected PosePosition pelvisPose = new PosePosition();
-    protected PosePosition middleSpinePose = new PosePosition();
 
     /**
     * Last received posenet event, that is unprocessed
@@ -123,28 +120,32 @@ public class PoseCoreEventManager : MonoBehaviour {
             onRightAnklePoseEventReceived(pose.rightFoot);
         }
 
-        if (onPelvisPoseEventReceived != null) {
-            onPelvisPoseEventReceived(this.pelvisPose);
+        if (onRootPoseEventReceived != null) {
+            onRootPoseEventReceived(pose.root);
         }
         if (onMiddleSpinePoseEventReceived!= null) {
-            onMiddleSpinePoseEventReceived(this.middleSpinePose);
+            onMiddleSpinePoseEventReceived(pose.spine3);
         }
     }
 
     protected void baseHandlingOfPoseEvent(PoseEvent pose) {
-        calculateCalculatedNodes(pose);
-        lastPose.set(pose, pelvisPose, middleSpinePose);
+        calculateCalculatedNodes(ref pose);
+        lastPose.set(pose);
     }
 
     /**
-     * Calculates the pelvis & middleSpine positions based on the other points
+     * Calculates the pelvis & middleSpine positions based on the other points, if they aren't already present
      */
-    protected void calculateCalculatedNodes(PoseEvent newPose) {
-//        pelvisPose = new PosePosition();
-        pelvisPose.x = (newPose.rightHip.x + newPose.leftHip.x) / 2;
-        pelvisPose.y = (newPose.rightHip.y + newPose.leftHip.y) / 2;
-//        middleSpinePose = new PosePosition();
-        middleSpinePose.x = (newPose.rightHip.x + newPose.leftShoulder.x) / 2;
-        middleSpinePose.y = (newPose.leftShoulder.y + newPose.leftHip.y) / 2;
+    protected void calculateCalculatedNodes(ref PoseEvent newPose) {
+        if (newPose.root == null) {
+            newPose.root = new PosePosition();
+            newPose.root.x = (newPose.rightHip.x + newPose.leftHip.x) / 2;
+            newPose.root.y = (newPose.rightHip.y + newPose.leftHip.y) / 2;
+        }
+        if (newPose.spine3 == null) {
+            newPose.spine3 = new PosePosition();
+            newPose.spine3.x = (newPose.rightHip.x + newPose.leftShoulder.x) / 2;
+            newPose.spine3.y = (newPose.leftShoulder.y + newPose.leftHip.y) / 2;
+        }
     }
 }

@@ -996,7 +996,7 @@ MonoBehaviour:
   rightKnee: {fileID: 0}
   leftFoot: {fileID: 36761172}
   rightFoot: {fileID: 1909682416}
-  pelvis: {fileID: 360079423}
+  root: {fileID: 360079423}
   middleSpine: {fileID: 0}
   smoothening: 1
   legLength: 1.155
@@ -1615,7 +1615,7 @@ MonoBehaviour:
   rightKnee: {fileID: 0}
   leftFoot: {fileID: 36761172}
   rightFoot: {fileID: 1909682416}
-  pelvis: {fileID: 360079423}
+  root: {fileID: 360079423}
   middleSpine: {fileID: 0}
   smoothening: 10
   legLength: 0.7

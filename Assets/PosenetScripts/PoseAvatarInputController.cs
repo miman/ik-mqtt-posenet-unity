@@ -55,7 +55,7 @@ public class PoseAvatarInputController : PoseEventHandler {
     private bool adjusting = true;
 
     private Dictionary<string, List<PosePosition>> adjustmentMap = new Dictionary<string, List<PosePosition>>();
-    private string pelvisStr = "Pelvis";
+    private string rootStr = "Root";
     private string leftHandStr = "Left Hand";
     private string rightHandStr = "Right Hand";
     private string leftFootStr = "Left Foot";
@@ -82,7 +82,7 @@ public class PoseAvatarInputController : PoseEventHandler {
     public void Start() {
         DontDestroyOnLoad(this);
 
-        adjustmentMap.Add(pelvisStr, new List<PosePosition>());
+        adjustmentMap.Add(rootStr, new List<PosePosition>());
         adjustmentMap.Add(leftHandStr, new List<PosePosition>());
         adjustmentMap.Add(rightHandStr, new List<PosePosition>());
         adjustmentMap.Add(leftFootStr, new List<PosePosition>());
@@ -126,13 +126,13 @@ public class PoseAvatarInputController : PoseEventHandler {
     private void handleAdjustmentInfo() {
         // Calculate factors
         Vector2 sum = new Vector2(0, 0);
-        foreach (PosePosition pp in adjustmentMap[pelvisStr]) {
+        foreach (PosePosition pp in adjustmentMap[rootStr]) {
             sum.y += pp.y;
             sum.x += pp.x;
         }
         Vector2 hipVector = new Vector2();
-        hipVector.x = (sum.x / adjustmentMap[pelvisStr].Count);
-        hipVector.y = (sum.y / adjustmentMap[pelvisStr].Count);
+        hipVector.x = (sum.x / adjustmentMap[rootStr].Count);
+        hipVector.y = (sum.y / adjustmentMap[rootStr].Count);
 
         // Handle left foot
         Vector2 leftFootvector = getAverageAdjustmentValue(leftFootStr);
@@ -180,7 +180,7 @@ public class PoseAvatarInputController : PoseEventHandler {
 
 
         Debug.Log("Adjustment ended");
-        Debug.Log("Adjustment base data: hipVector: " + hipVector + ", leftFootvector = " + leftFootvector + ", rightFootvector: " + rightFootvector + ", # of adjustment entries: " + adjustmentMap[pelvisStr].Count);
+        Debug.Log("Adjustment base data: hipVector: " + hipVector + ", leftFootvector = " + leftFootvector + ", rightFootvector: " + rightFootvector + ", # of adjustment entries: " + adjustmentMap[rootStr].Count);
         Debug.Log("Adjustment base data: leftShoulderVector: " + leftShoulderVector + ", rightShoulderVector = " + rightShoulderVector + ", headVector: " + headVector);
         Debug.Log("Adjustment base data: leftWristVector: " + leftWristVector + ", rightWristVector = " + rightWristVector);
         Debug.Log("Adjustment adaptions: zeroPointAdjustment: " + zeroPointAdjustment);
@@ -208,9 +208,12 @@ public class PoseAvatarInputController : PoseEventHandler {
      * Reading adjustment information
      */
     private void readAdjustmentInfo() {
+        if (lastPose == null) {
+            return;
+        }
         // Still adjusting
-        if (lastPose.pelvisPose != null) {
-            adjustmentMap[pelvisStr].Add(lastPose.pelvisPose);
+        if (lastPose.root != null) {
+            adjustmentMap[rootStr].Add(lastPose.root);
         }
 
         if (lastPose.leftFoot != null) {
@@ -253,7 +256,7 @@ public class PoseAvatarInputController : PoseEventHandler {
     private void handleNewPoseEvent(BodyPositionState pose) {
 //        calculateFloorLevel(pose);
 
-        handleNodeMovement(lastPose.pelvisPose, pelvis, ref prevPelvisCoord, "Pelvis", ref currentPelvisPos);
+        handleNodeMovement(lastPose.root, root, ref prevRootCoord, "Root", ref currentPelvisPos);
 //        handleNodeMovement(middleSpinePose, middleSpine, ref prevMiddleSpineCoord, "MiddleSpine");
 
         handleLeftShoulderNodeMovement(lastPose.leftShoulder, leftShoulder, ref prevLeftShoulderCoord, "leftShoulder");
@@ -276,7 +279,7 @@ public class PoseAvatarInputController : PoseEventHandler {
     }
 
     private void calculateFloorLevel(PoseEvent pose) {
-        zeroPointAdjustment.x = lastPose.pelvisPose.x;
+        zeroPointAdjustment.x = lastPose.root.x;
         if (zeroPointAdjustment.y > pose.leftFoot.y) {
             zeroPointAdjustment.y = pose.leftFoot.y;
             Debug.Log("zeroPointAdjustment.y = " + zeroPointAdjustment.y);
@@ -339,8 +342,8 @@ public class PoseAvatarInputController : PoseEventHandler {
         // Try to remove gittering in positions due to invalid points by smoothening
         previousCoord = smoothenMovement(posePos, previousCoord);
         // Convert from percentage value to game coordinates & adjust for screen center not being zero in input
-        currentLeftShoulderPos.x = (previousCoord.x - prevPelvisCoord.x) * shoulderWidthScaleAdjustment / 2 + currentPelvisPos.x;
-        currentLeftShoulderPos.y = (previousCoord.y - prevPelvisCoord.y) * leftShoulderScaleAdjustment + currentPelvisPos.y;
+        currentLeftShoulderPos.x = (previousCoord.x - prevRootCoord.x) * shoulderWidthScaleAdjustment / 2 + currentPelvisPos.x;
+        currentLeftShoulderPos.y = (previousCoord.y - prevRootCoord.y) * leftShoulderScaleAdjustment + currentPelvisPos.y;
 
         Debug.Log("New pos for '" + nodeName + "', " + " Pose: " + posePos + " -> After: " + currentLeftShoulderPos);
         Debug.Log("previousCoord: " + previousCoord + ", currentLeftShoulderPos: " + currentLeftShoulderPos);
@@ -365,8 +368,8 @@ public class PoseAvatarInputController : PoseEventHandler {
         // Try to remove gittering in positions due to invalid points by smoothening
         previousCoord = smoothenMovement(posePos, previousCoord);
         // Convert from percentage value to game coordinates & adjust for screen center not being zero in input
-        currentRightShoulderPos.x = (previousCoord.x - prevPelvisCoord.x) * shoulderWidthScaleAdjustment/2 + currentPelvisPos.x;
-        currentRightShoulderPos.y = (previousCoord.y - prevPelvisCoord.y) * rightShoulderScaleAdjustment + currentPelvisPos.y;
+        currentRightShoulderPos.x = (previousCoord.x - prevRootCoord.x) * shoulderWidthScaleAdjustment/2 + currentPelvisPos.x;
+        currentRightShoulderPos.y = (previousCoord.y - prevRootCoord.y) * rightShoulderScaleAdjustment + currentPelvisPos.y;
 
         Debug.Log("New pos for '" + nodeName + "', " + " Pose: " + posePos + " -> After: " + currentRightShoulderPos);
         //        Debug.Log("floorPercentageLevel: " + floorPercentageLevel + ", xAvgFactor: " + xAvgFactor);

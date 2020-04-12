@@ -136,4 +136,34 @@ public class PoseEvent {
     {
         return JsonUtility.FromJson<PoseEvent>(jsonString);
     }
+
+    /**
+     * This is a hack to set all values missing in the received msg to null while the Unity JSON utility always creates an object for everything even if it is missing.
+     */
+    public void setAllValuesWithoutValueToNull() {
+        if (!root.isSet()) {
+            root = null;
+        }
+        if (!spine1.isSet()) {
+            spine1 = null;
+        }
+        if (!spine2.isSet()) {
+            spine2 = null;
+        }
+        if (!spine3.isSet()) {
+            spine3 = null;
+        }
+        if (!spine4.isSet()) {
+            spine4 = null;
+        }
+        if (!spine5.isSet()) {
+            spine5 = null;
+        }
+        if (!spine6.isSet()) {
+            spine6 = null;
+        }
+        if (!spine7.isSet()) {
+            spine7 = null;
+        }
+    }
 }

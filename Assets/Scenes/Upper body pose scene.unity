@@ -1252,7 +1252,7 @@ MonoBehaviour:
   rightKnee: {fileID: 795249671}
   leftFoot: {fileID: 799440158}
   rightFoot: {fileID: 1810382819}
-  pelvis: {fileID: 628528767}
+  root: {fileID: 628528767}
   middleSpine: {fileID: 801683649}
   smoothening: 1
   widthSizeFactor: 3

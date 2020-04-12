@@ -25,7 +25,7 @@ public class PoseEventHandler: MonoBehaviour {
 
     [Header("Calculated locations")]
     // Calculated
-    public GameObject pelvis = null;
+    public GameObject root = null;
     public GameObject middleSpine = null;
 
     /**
@@ -59,7 +59,7 @@ public class PoseEventHandler: MonoBehaviour {
     protected Vector2 prevLeftFootCoord;
     protected Vector2 prevRightFootCoord;
 
-    protected Vector2 prevPelvisCoord;
+    protected Vector2 prevRootCoord;
     protected Vector2 prevMiddleSpineCoord;
 
     void OnEnable() {
@@ -103,7 +103,7 @@ public class PoseEventHandler: MonoBehaviour {
         prevLeftFootCoord = new Vector2(xFactor, yFactor);
         prevRightFootCoord = new Vector2(xFactor, yFactor);
 
-        prevPelvisCoord = new Vector2(xFactor, yFactor);
+        prevRootCoord = new Vector2(xFactor, yFactor);
         prevMiddleSpineCoord = new Vector2(xFactor, yFactor);
     }
 }

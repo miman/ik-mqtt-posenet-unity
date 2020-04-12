@@ -186,6 +186,7 @@ namespace PoseClient
 //                Debug.Log("Pose event received (ping: " + pingTime + ")");
                 int startIndex = msg.IndexOf("payload\":") + "payload\":".Length;
                 PoseEvent pose = PoseEvent.CreateFromJSON(msg.Substring(startIndex, msg.Length - (startIndex + 1)));
+                pose.setAllValuesWithoutValueToNull();
                 if (poseCoreEventManager != null) {
                     poseCoreEventManager.HandlePoseEvent(pose);
                 }
