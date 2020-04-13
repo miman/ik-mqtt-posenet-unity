@@ -165,5 +165,11 @@ public class PoseEvent {
         if (!spine7.isSet()) {
             spine7 = null;
         }
+        if (!leftFoot.isSet()) {
+            leftFoot = null;
+        }
+        if (!rightFoot.isSet()) {
+            rightFoot = null;
+        }
     }
 }
