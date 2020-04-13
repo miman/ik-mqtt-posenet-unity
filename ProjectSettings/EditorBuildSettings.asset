@@ -6,6 +6,6 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/VR-pose.unity
-    guid: 0dd2f47f55ae8e240bfe7eca52905cf6
+    path: Assets/Scenes/Upper body pose scene.unity
+    guid: ff333cba343c7904caadaac09a51ba9d
   m_configObjects: {}
