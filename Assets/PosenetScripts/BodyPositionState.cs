@@ -68,6 +68,28 @@ public class BodyPositionState {
         this.spine3 = new PosePosition();
     }
 
+    public BodyPositionState(BodyPositionState state) {
+        this.nose = new PosePosition(state.nose);
+        this.leftFoot = new PosePosition(state.leftFoot);
+        this.rightFoot = new PosePosition(state.rightFoot);
+        this.leftEar = new PosePosition(state.leftEar);
+        this.rightEar = new PosePosition(state.rightEar);
+        this.leftElbow = new PosePosition(state.leftElbow);
+        this.rightElbow = new PosePosition(state.rightElbow);
+        this.leftEye = new PosePosition(state.leftEye);
+        this.rightEye = new PosePosition(state.rightEye);
+        this.leftHip = new PosePosition(state.leftHip);
+        this.rightHip = new PosePosition(state.rightHip);
+        this.leftKnee = new PosePosition(state.leftKnee);
+        this.rightKnee = new PosePosition(state.rightKnee);
+        this.leftShoulder = new PosePosition(state.leftShoulder);
+        this.rightShoulder = new PosePosition(state.rightShoulder);
+        this.leftWrist = new PosePosition(state.leftWrist);
+        this.rightWrist = new PosePosition(state.rightWrist);
+        this.root = new PosePosition(state.root);
+        this.spine3 = new PosePosition(state.spine3);
+    }
+
     public void set(PoseEvent poseEvent) {
         this.nose = poseEvent.nose;
         this.leftFoot = poseEvent.leftFoot;
