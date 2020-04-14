@@ -367,6 +367,10 @@ public class PoseCoreEventManager : MonoBehaviour {
             Debug.Log("lastPose.nose == null !!!");
         }
     }
+
+    public BodyPositionState getReferencePose() {
+        return referencePose;
+    }
 }
 
 public enum START_END {
