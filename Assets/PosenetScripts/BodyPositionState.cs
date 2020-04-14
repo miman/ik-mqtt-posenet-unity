@@ -111,4 +111,17 @@ public class BodyPositionState {
         this.root = poseEvent.root;
         this.spine3 = poseEvent.spine3;
     }
+
+    public static BodyPositionState operator -(BodyPositionState a, BodyPositionState b) {
+        BodyPositionState p = new BodyPositionState();
+        p.nose = a.nose - b.nose;
+        p.leftFoot = a.leftFoot - b.leftFoot;
+        p.rightFoot = a.rightFoot - b.rightFoot;
+        p.leftWrist = a.leftWrist - b.leftWrist;
+        p.rightWrist = a.rightWrist - b.rightWrist;
+        p.root = a.root - b.root;
+        p.spine3 = a.spine3 - b.spine3;
+        return p;
+    }
+
 }

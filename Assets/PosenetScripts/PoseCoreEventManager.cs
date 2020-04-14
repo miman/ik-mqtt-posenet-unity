@@ -51,7 +51,14 @@ public class PoseCoreEventManager : MonoBehaviour {
     public delegate void MiddleSpinePoseEventAction(PosePosition pos);
     public static event MiddleSpinePoseEventAction onMiddleSpinePoseEventReceived;
 
-    public delegate void InitialPoseAction(BodyPositionState pose);
+    // Calculated events
+    public delegate void CrouchingAction(START_END state, BodyPositionState pose);
+    public static event CrouchingAction onCrouching;
+    public delegate void JumpingAction(START_END state, BodyPositionState pose);
+    public static event JumpingAction onJumping;
+
+
+    public delegate void InitialPoseAction(BodyPositionState pose, float xAdjustmentToZero);
     public static event InitialPoseAction onInitialPoseCalculated;
 
     /**
@@ -64,13 +71,23 @@ public class PoseCoreEventManager : MonoBehaviour {
     [Tooltip("# Secs before starting the adjustment")]
     public float adjustmentDelay = 3;
 
-    /**
-     * This is the percentage value received from PoseNet that we say is the floor level
-     */
-    private float floorPercentageLevel = 1;
+    [Tooltip("Jumping adjustment")]
+    public float jumpingAdjustment = 7;
+    [Tooltip("Crouching adjustment")]
+    public float crouchingAdjustment = -8;
+
     private DateTime adjustmentEndTime;
     private DateTime adjustmentStartTime;
     private bool adjusting = true;
+    /**
+     * This is the reference pose which we see as the base
+     */
+    protected BodyPositionState referencePose = null;
+
+    /**
+     * If this is > 0 then subtracting this value from the X-value will make the avatar relative to the zero base level.
+     */
+    protected float xAdjustmentToZero = -1;
 
     private Dictionary<string, List<PosePosition>> adjustmentMap = new Dictionary<string, List<PosePosition>>();
     private string rootStr = "Root";
@@ -82,12 +99,15 @@ public class PoseCoreEventManager : MonoBehaviour {
     private string leftShoulderStr = "Left Shoulder";
     private string rightShoulderStr = "Right Shoulder";
 
+    private POSE_ACTION_STATE currentState = POSE_ACTION_STATE.CREATING_REF_POINT;
+
     /**
      * A new posenet event was received
      */
     public void HandlePoseEvent(PoseEvent pose) {
 //        Debug.Log("PoseEvent handled by PoseCoreEventManager: " + pose);
         baseHandlingOfPoseEvent(pose);
+        BodyPositionState currentPose = new BodyPositionState(pose);
 
         if (onPoseEventReceived != null) {
             // Inform all handlers of this event
@@ -153,11 +173,43 @@ public class PoseCoreEventManager : MonoBehaviour {
         if (onMiddleSpinePoseEventReceived!= null) {
             onMiddleSpinePoseEventReceived(pose.spine3);
         }
+
+        processCalcState(currentPose);
+        lastPose = currentPose;
+    }
+
+    /**
+     * Processing if we are moving in to a new state.
+     * If so we also notify about this to any event listeners.
+     */
+    private void processCalcState(BodyPositionState pose) {
+        if (currentState == POSE_ACTION_STATE.NONE) {
+            if ((pose.root.y - referencePose.root.y) < crouchingAdjustment) {
+                // We are crouching
+                currentState = POSE_ACTION_STATE.CROUCHING;
+                onCrouching(START_END.STARTING, pose);
+            } else if ((pose.root.y - referencePose.root.y) > jumpingAdjustment) {
+                // We are jumping
+                currentState = POSE_ACTION_STATE.JUMPING;
+                onJumping(START_END.STARTING, pose);
+            }
+        } else if (currentState == POSE_ACTION_STATE.CROUCHING) {
+            if ((pose.root.y - referencePose.root.y) > crouchingAdjustment/2) {
+                // We are NOT crouching anymore
+                currentState = POSE_ACTION_STATE.NONE;
+                onCrouching(START_END.ENDING, pose);
+            }
+        } else if (currentState == POSE_ACTION_STATE.JUMPING) {
+            if ((pose.root.y - referencePose.root.y) < jumpingAdjustment/3) {
+                // We are NOT jumping anymore
+                currentState = POSE_ACTION_STATE.NONE;
+                onJumping(START_END.ENDING, pose);
+            }
+        }
     }
 
     protected void baseHandlingOfPoseEvent(PoseEvent pose) {
         calculateCalculatedNodes(ref pose);
-        lastPose.set(pose);
     }
 
     /**
@@ -205,6 +257,7 @@ public class PoseCoreEventManager : MonoBehaviour {
                 handleAdjustmentInfo();
 
                 adjusting = false;
+                currentState = POSE_ACTION_STATE.NONE;
             } else {
                 Debug.Log("Adjusting...");
                 readAdjustmentInfo();
@@ -227,12 +280,31 @@ public class PoseCoreEventManager : MonoBehaviour {
         Vector3 rightWristVector = getAveragePosition(rightHandStr);
         Vector3 headVector = getAveragePosition(headStr);
 
+        referencePose = new BodyPositionState();
+        referencePose.root = new PosePosition(rootVector);
+        referencePose.leftFoot = new PosePosition(leftFootvector);
+        referencePose.rightFoot = new PosePosition(rightFootvector);
+        referencePose.leftShoulder = new PosePosition(leftShoulderVector);
+        referencePose.rightShoulder = new PosePosition(rightShoulderVector);
+        referencePose.leftWrist = new PosePosition(leftWristVector);
+        referencePose.rightWrist = new PosePosition(rightWristVector);
+        referencePose.nose = new PosePosition(headVector);
+
+        if (leftFootvector.y > 0) {
+            if (rightFootvector.y > 0) {
+                xAdjustmentToZero = Math.Min(leftFootvector.y, rightFootvector.y);
+            } else {
+                xAdjustmentToZero = leftFootvector.y;
+            }
+        } else if (rightFootvector.y > 0) {
+            xAdjustmentToZero = rightFootvector.y;
+        }
         BodyPositionState state = new BodyPositionState();
         state.root = new PosePosition(rootVector);
         state.leftFoot = new PosePosition(leftFootvector);
         state.rightFoot = new PosePosition(rightFootvector);
         if (onInitialPoseCalculated != null) {
-            onInitialPoseCalculated(state);
+            onInitialPoseCalculated(state, xAdjustmentToZero);
         }
     }
 
@@ -295,4 +367,16 @@ public class PoseCoreEventManager : MonoBehaviour {
             Debug.Log("lastPose.nose == null !!!");
         }
     }
+}
+
+public enum START_END {
+    STARTING,
+    ENDING
+}
+
+public enum POSE_ACTION_STATE {
+    NONE,
+    CREATING_REF_POINT,
+    JUMPING,
+    CROUCHING
 }

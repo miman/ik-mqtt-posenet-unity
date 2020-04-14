@@ -19,6 +19,8 @@ public class DebugInfoDisplayer : MonoBehaviour
     public Text maxRoot = null;
     [Tooltip("The Min root value")]
     public Text minRoot = null;
+    [Tooltip("The Current state string")]
+    public Text currentStateText = null;
 
     [Tooltip("The center of the screen to set pos for text elements")]
     public Vector3 originScreenCenter = new Vector3(0,1,3);
@@ -41,20 +43,30 @@ public class DebugInfoDisplayer : MonoBehaviour
      * Contains all received pose evetns
      */
     List<BodyPositionState> receivedPoseEvents = new List<BodyPositionState>();
+    List<BodyPositionState> diffPoses = new List<BodyPositionState>();
+
+    private float xAdjustmentToZero = -1;
+
+    START_END stateTransition = START_END.STARTING;
+    private POSE_ACTION_STATE currentState = POSE_ACTION_STATE.NONE;
 
     void OnEnable() {
         PoseCoreEventManager.onPoseEventReceived += onPoseEventReceived;
         PoseCoreEventManager.onInitialPoseCalculated += onInitialPoseCalculated;
+        PoseCoreEventManager.onCrouching += onCrouching;
+        PoseCoreEventManager.onJumping += onJumping;
         Debug.Log("DebugInfoDisplayer::onPoseEventReceived enabled");
     }
-
 
     void OnDisable() {
         PoseCoreEventManager.onPoseEventReceived -= onPoseEventReceived;
         PoseCoreEventManager.onInitialPoseCalculated -= onInitialPoseCalculated;
+        PoseCoreEventManager.onCrouching -= onCrouching;
+        PoseCoreEventManager.onJumping -= onJumping;
         Debug.Log("DebugInfoDisplayer::onPoseEventReceived disabled");
         if (storeReceivedPoses) {
-            storeReceivedPosesToFile(receivedPoseEvents);
+            storeReceivedPosesToFile(receivedPoseEvents, "/receivedPoseEvents.csv");
+            storeReceivedPosesToFile(diffPoses, "/diffPoses.csv");
         }
     }
 
@@ -68,11 +80,32 @@ public class DebugInfoDisplayer : MonoBehaviour
         updateMinValues(lastPose);
         if (storeReceivedPoses) {
             receivedPoseEvents.Add(new BodyPositionState(pose));
+            if (averagePose != null) {
+                diffPoses.Add(pose - averagePose);
+            }
         }
     }
 
-    public void onInitialPoseCalculated(BodyPositionState pose) {
+    public void onInitialPoseCalculated(BodyPositionState pose, float xAdjustmentToZero) {
         averagePose = pose;
+        this.xAdjustmentToZero = xAdjustmentToZero;
+    }
+
+
+    private void onJumping(START_END state, BodyPositionState pose) {
+        if (state == START_END.STARTING) {
+            currentState = POSE_ACTION_STATE.JUMPING;
+        } else {
+            currentState = POSE_ACTION_STATE.NONE;
+        }
+    }
+
+    private void onCrouching(START_END state, BodyPositionState pose) {
+        if (state == START_END.STARTING) {
+            currentState = POSE_ACTION_STATE.CROUCHING;
+        } else {
+            currentState = POSE_ACTION_STATE.NONE;
+        }
     }
 
     // Start is called before the first frame update
@@ -103,6 +136,9 @@ public class DebugInfoDisplayer : MonoBehaviour
         }
         if (minRoot != null && minPose != null) {
             minRoot.text = "Min: " + minPose.root.ToString();
+        }
+        if (currentStateText != null) {
+            currentStateText.text = currentState.ToString();
         }
     }
 
@@ -136,9 +172,9 @@ public class DebugInfoDisplayer : MonoBehaviour
         }
     }
 
-    private void storeReceivedPosesToFile(List<BodyPositionState> receivedPoseEvents) {
+    private void storeReceivedPosesToFile(List<BodyPositionState> receivedPoseEvents, string filename) {
         string folder = "tmpfiles";
-        string path = folder + "/receivedPoseEvents.csv";
+        string path = folder + "/" + filename;
         bool newFile = false;
 
         Debug.Log("Culture before: " + CultureInfo.CurrentCulture.DisplayName);
