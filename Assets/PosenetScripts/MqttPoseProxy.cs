@@ -145,10 +145,10 @@ namespace PoseClient
                 }
                 Debug.Log("Connected to MQTT @ " + brokerAddress + ":" + brokerPort + ", status: " + connectResponse);
 
-                SubscribeToTopic("posetracking/+/+/+/pose-event");
-                SubscribeToTopic("posetracking/+/+/+/pose-setting");
+                SubscribeToTopic("json/posecore/+/+/pose-event/+");
+                SubscribeToTopic("json/posecore/+/+/pose-setting/+");
 
-                ushort publishResp = client.Publish("posetracking/" + clientId + "/connected", System.Text.Encoding.UTF8.GetBytes(@"{ ""cloudStatus"": ""ready"" }"), MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE, false);
+                ushort publishResp = client.Publish("json/posecore/" + clientId + "/connected", System.Text.Encoding.UTF8.GetBytes(@"{ ""cloudStatus"": ""ready"" }"), MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE, false);
                 Debug.Log("Publish QOS0 response: : " + publishResp);
             }
             catch (MqttCommunicationException ex)
