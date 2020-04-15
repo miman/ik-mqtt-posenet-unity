@@ -148,7 +148,8 @@ namespace PoseClient
                 SubscribeToTopic("json/posecore/+/+/pose-event/+");
                 SubscribeToTopic("json/posecore/+/+/pose-setting/+");
 
-                ushort publishResp = client.Publish("json/posecore/" + clientId + "/connected", System.Text.Encoding.UTF8.GetBytes(@"{ ""cloudStatus"": ""ready"" }"), MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE, false);
+                ClientConnectedMsg connectedMsg = new ClientConnectedMsg(clientId, brokerAddress + ":" + brokerPort);
+                ushort publishResp = client.Publish("json/posecore/" + clientId + "/connected/1", System.Text.Encoding.UTF8.GetBytes(connectedMsg.toJSON()), MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE, false);
                 Debug.Log("Publish QOS0 response: : " + publishResp);
             }
             catch (MqttCommunicationException ex)
