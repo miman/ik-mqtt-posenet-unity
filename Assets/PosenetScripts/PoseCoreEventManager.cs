@@ -187,27 +187,35 @@ public class PoseCoreEventManager : MonoBehaviour {
             if ((pose.root.y - referencePose.root.y) < crouchingAdjustment) {
                 // We are crouching
                 currentState = POSE_ACTION_STATE.CROUCHING;
-                onCrouching(START_END.STARTING, pose);
+                if (onCrouching != null) {
+                    onCrouching(START_END.STARTING, pose);
+                }
             } else if ((pose.root.y - referencePose.root.y) > jumpingAdjustment) {
                 // We are jumping
                 currentState = POSE_ACTION_STATE.JUMPING;
-                onJumping(START_END.STARTING, pose);
+                if (onJumping != null) {
+                    onJumping(START_END.STARTING, pose);
+                }
             }
         } else if (currentState == POSE_ACTION_STATE.CROUCHING) {
             if ((pose.root.y - referencePose.root.y) > crouchingAdjustment/2) {
                 // We are NOT crouching anymore
                 currentState = POSE_ACTION_STATE.NONE;
-                onCrouching(START_END.ENDING, pose);
+                if (onCrouching != null) {
+                    onCrouching(START_END.ENDING, pose);
+                }
             }
         } else if (currentState == POSE_ACTION_STATE.JUMPING) {
             if ((pose.root.y - referencePose.root.y) < jumpingAdjustment/3) {
                 // We are NOT jumping anymore
                 currentState = POSE_ACTION_STATE.NONE;
-                onJumping(START_END.ENDING, pose);
+                if (onJumping != null) {
+                    onJumping(START_END.ENDING, pose);
+                }
             }
         }
     }
-
+    
     protected void baseHandlingOfPoseEvent(PoseEvent pose) {
         calculateCalculatedNodes(ref pose);
     }
