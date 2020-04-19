@@ -4,6 +4,12 @@ using UnityEngine;
 
 [System.Serializable]
 public class PoseEvent {
+
+    /**
+     * TheTo identify the body if there are several visible
+     */
+    public string bodyId = null;
+
     public PosePosition nose;
     public PosePosition head;
     public PosePosition leftEye;
