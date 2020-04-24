@@ -55,6 +55,7 @@ public class DebugInfoDisplayer : MonoBehaviour
         PoseCoreEventManager.onInitialPoseCalculated += onInitialPoseCalculated;
         PoseCoreEventManager.onCrouching += onCrouching;
         PoseCoreEventManager.onJumping += onJumping;
+        PoseCoreEventManager.onStandingInTPose += onStandingInTPose;
         Debug.Log("DebugInfoDisplayer::onPoseEventReceived enabled");
     }
 
@@ -63,6 +64,7 @@ public class DebugInfoDisplayer : MonoBehaviour
         PoseCoreEventManager.onInitialPoseCalculated -= onInitialPoseCalculated;
         PoseCoreEventManager.onCrouching -= onCrouching;
         PoseCoreEventManager.onJumping -= onJumping;
+        PoseCoreEventManager.onStandingInTPose -= onStandingInTPose;
         Debug.Log("DebugInfoDisplayer::onPoseEventReceived disabled");
         if (storeReceivedPoses) {
             storeReceivedPosesToFile(receivedPoseEvents, "/receivedPoseEvents.csv");
@@ -103,6 +105,14 @@ public class DebugInfoDisplayer : MonoBehaviour
     private void onCrouching(START_END state, BodyPositionState pose) {
         if (state == START_END.STARTING) {
             currentState = POSE_ACTION_STATE.CROUCHING;
+        } else {
+            currentState = POSE_ACTION_STATE.NONE;
+        }
+    }
+
+    private void onStandingInTPose(START_END state, BodyPositionState pose) {
+        if (state == START_END.STARTING) {
+            currentState = POSE_ACTION_STATE.STANDING_IN_T_POSE;
         } else {
             currentState = POSE_ACTION_STATE.NONE;
         }

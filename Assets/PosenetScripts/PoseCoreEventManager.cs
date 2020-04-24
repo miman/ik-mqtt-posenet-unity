@@ -56,6 +56,8 @@ public class PoseCoreEventManager : MonoBehaviour {
     public static event CrouchingAction onCrouching;
     public delegate void JumpingAction(START_END state, BodyPositionState pose);
     public static event JumpingAction onJumping;
+    public delegate void StandingInTPoseAction(START_END state, BodyPositionState pose);
+    public static event StandingInTPoseAction onStandingInTPose;
 
 
     public delegate void InitialPoseAction(BodyPositionState pose, float xAdjustmentToZero);
@@ -66,19 +68,22 @@ public class PoseCoreEventManager : MonoBehaviour {
     */
     protected BodyPositionState lastPose = new BodyPositionState();
 
-    [Tooltip("# Secs for initial factor adjustment")]
-    public float secsForAdjustment = 5;
-    [Tooltip("# Secs before starting the adjustment")]
-    public float adjustmentDelay = 3;
+    [Tooltip("# If we do an initial calibration or not")]
+    public bool doCalibration = true;
+    [Tooltip("# Duration for initial calibration")]
+    public float secsForCalibration = 2;
+    [Tooltip("# Secs before starting the calibration")]
+    public float calibrationDelay = 0.2f;
 
     [Tooltip("Jumping adjustment")]
     public float jumpingAdjustment = 7;
     [Tooltip("Crouching adjustment")]
     public float crouchingAdjustment = -8;
 
-    private DateTime adjustmentEndTime;
-    private DateTime adjustmentStartTime;
-    private bool adjusting = true;
+    private DateTime calibrationEndTime;
+    private DateTime calibrationStartTime;
+    // If true we are calibrating the body points to a zero T-pose
+    private bool calibrating = true;
     /**
      * This is the reference pose which we see as the base
      */
@@ -183,6 +188,24 @@ public class PoseCoreEventManager : MonoBehaviour {
      * If so we also notify about this to any event listeners.
      */
     private void processCalcState(BodyPositionState pose) {
+        if (calibrating) {
+            // Check for T-pose
+            bool standingInTPose = isStandingInTPose(pose);
+            if (standingInTPose) {
+                // if this has been the same for more than x ms -> go to T-pose
+                if (currentState != POSE_ACTION_STATE.STANDING_IN_T_POSE) {
+                    calibrationEndTime = System.DateTime.Now;
+                    calibrationStartTime = System.DateTime.Now;
+                    calibrationStartTime = calibrationStartTime.AddSeconds(calibrationDelay);
+                    calibrationEndTime = calibrationEndTime.AddSeconds(secsForCalibration + calibrationDelay);
+
+                    currentState = POSE_ACTION_STATE.STANDING_IN_T_POSE;
+                    if (onStandingInTPose != null) {
+                        onStandingInTPose(START_END.STARTING, pose);
+                    }
+                }
+            }
+        }
         if (currentState == POSE_ACTION_STATE.NONE) {
             if ((pose.root.y - referencePose.root.y) < crouchingAdjustment) {
                 // We are crouching
@@ -195,6 +218,11 @@ public class PoseCoreEventManager : MonoBehaviour {
                 currentState = POSE_ACTION_STATE.JUMPING;
                 if (onJumping != null) {
                     onJumping(START_END.STARTING, pose);
+                }
+            } else if (isStandingInTPose(pose)) {
+                currentState = POSE_ACTION_STATE.STANDING_IN_T_POSE;
+                if (onStandingInTPose != null) {
+                    onStandingInTPose(START_END.STARTING, pose);
                 }
             }
         } else if (currentState == POSE_ACTION_STATE.CROUCHING) {
@@ -213,9 +241,102 @@ public class PoseCoreEventManager : MonoBehaviour {
                     onJumping(START_END.ENDING, pose);
                 }
             }
+        } else if (currentState == POSE_ACTION_STATE.STANDING_IN_T_POSE) {
+            if (!isStandingInTPose(pose)) {
+                // We are NOT standing in T-pose anymore
+                currentState = POSE_ACTION_STATE.NONE;
+                if (onStandingInTPose != null) {
+                    onStandingInTPose(START_END.ENDING, pose);
+                }
+            }
         }
     }
-    
+
+    /**
+     *  Check for T-pose
+     *  
+     *  Definition of T-pose:
+     *  - Hands & elbows should be in +/-5% of shoulder in Y value
+     *  - Hands should be a bit from elbows that should be a bit from shoulder in X value
+     *  - Feet should be a bit from knees that should be a bit from root in Y value
+     *  - Left foot should be left of root that should be left of right foot in X value
+     *  - Spine3 should be a bit above root
+     */
+    private bool isStandingInTPose(BodyPositionState pose) {
+        // Ensure that person is standing up OK
+        if ( (pose.spine3.y > pose.root.y) && 
+             (pose.leftShoulder.y > pose.spine3.y) && 
+             (pose.rightShoulder.y > pose.spine3.y)
+            ) {
+            // Upper body ok -> check under body if it is in picture
+            if (pose.leftKnee.y > 0.1f && pose.rightKnee.y > 0.1) {
+                // Knees are in picture -> check them
+                if ((pose.root.y < pose.leftKnee.y) ||
+                    (pose.root.y < pose.rightKnee.y)) {
+                    // knees are over root
+                    Debug.Log("No T-pose: knees are over root");
+                    return false;
+                }
+                // Knees are out of  picture -> ignore them
+            }
+            if (pose.leftFoot.y > 0.1f && pose.rightFoot.y > 0.1) {
+                if ((pose.leftKnee.y < pose.leftFoot.y) ||
+                    (pose.rightKnee.y < pose.rightFoot.y)
+                    ) {
+                    // feet are over knees
+                    Debug.Log("No T-pose: feet are over knees");
+                    return false;
+                }
+                // Feet are out of  picture -> ignore them
+            }
+            // All is Ok - standing up
+        } else {
+            // Person is not standing ok -> NOK
+            Debug.Log("No T-pose: Person is not standing ok -> NOK");
+            return false;
+        }
+
+        float deltaY = Mathf.Abs(pose.leftShoulder.y - pose.spine3.y)/2;
+        // Ensure arms are straight out
+        if ((pose.leftShoulder.x > pose.leftElbow.x) &&
+            (pose.leftElbow.x > pose.leftWrist.x) &&
+            (pose.rightShoulder.x < pose.rightElbow.x) &&
+            (pose.rightElbow.x < pose.rightWrist.x) &&
+            // Left hand & elbow should be between spine 3 & nose
+            (pose.leftWrist.y < pose.nose.y) && (pose.leftWrist.y > pose.spine3.y) &&
+            (pose.leftElbow.y < pose.nose.y) && (pose.leftElbow.y > pose.spine3.y) &&
+            // Righthand & elbow should be between spine 3 & nose
+            (pose.rightWrist.y < pose.nose.y) && (pose.rightWrist.y > pose.spine3.y) &&
+            (pose.rightElbow.y < pose.nose.y) && (pose.rightElbow.y > pose.spine3.y) &&
+            // Y-lvl of hand/elbow & shoulder should not differ by to much (straight arm)
+            (pose.leftShoulder.y - pose.leftWrist.y) < deltaY &&
+            (pose.leftShoulder.y - pose.leftElbow.y) < deltaY &&
+            (pose.rightShoulder.y - pose.rightWrist.y) < deltaY &&
+            (pose.rightShoulder.y - pose.rightElbow.y) < deltaY
+            ) {
+            // All is Ok - arms straight out
+        } else {
+            // Person is not with arms straight out -> NOK
+            Debug.Log("No T-pose: Person is not with arms straight out -> NOK");
+            return false;
+        }
+
+        // Ensure legs are not crossed
+        if ((pose.leftFoot.x < pose.rightFoot.x) &&
+            (pose.leftShoulder.x < pose.rightShoulder.x)
+            ) {
+            // All is Ok
+        } else {
+            // Person is not standing ok with legs -> NOK
+            Debug.Log("No T-pose: Person is not standing ok with legs -> NOK");
+            return false;
+        }
+
+        // Standing in T-pose OK
+        Debug.Log("T-pose OK");
+        return true;
+    }
+
     protected void baseHandlingOfPoseEvent(PoseEvent pose) {
         calculateCalculatedNodes(ref pose);
     }
@@ -247,24 +368,19 @@ public class PoseCoreEventManager : MonoBehaviour {
         adjustmentMap.Add(leftShoulderStr, new List<PosePosition>());
         adjustmentMap.Add(rightShoulderStr, new List<PosePosition>());
         adjustmentMap.Add(headStr, new List<PosePosition>());
-
-        adjustmentEndTime = System.DateTime.Now;
-        adjustmentStartTime = System.DateTime.Now;
-        adjustmentStartTime = adjustmentStartTime.AddSeconds(adjustmentDelay);
-        adjustmentEndTime = adjustmentEndTime.AddSeconds(secsForAdjustment + adjustmentDelay);
     }
 
     void Update() {
-        if (adjusting) {
-            if (System.DateTime.Now.CompareTo(adjustmentStartTime) < 0) {
-                // Don't start adjustment yet
+        if (calibrating) {
+            if (currentState != POSE_ACTION_STATE.STANDING_IN_T_POSE || System.DateTime.Now.CompareTo(calibrationStartTime) < 0) {
+                // Don't start adjustment yet, MUST stand i T-pose first
                 return;
             }
-            if (System.DateTime.Now.CompareTo(adjustmentEndTime) > 0) {
+            if (System.DateTime.Now.CompareTo(calibrationEndTime) > 0) {
                 // Adjustment time has ended
                 handleAdjustmentInfo();
 
-                adjusting = false;
+                calibrating = false;
                 currentState = POSE_ACTION_STATE.NONE;
             } else {
                 Debug.Log("Adjusting...");
@@ -390,5 +506,6 @@ public enum POSE_ACTION_STATE {
     NONE,
     CREATING_REF_POINT,
     JUMPING,
-    CROUCHING
+    CROUCHING,
+    STANDING_IN_T_POSE
 }

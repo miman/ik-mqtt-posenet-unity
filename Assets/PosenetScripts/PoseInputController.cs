@@ -155,7 +155,7 @@ public class PoseInputController : PoseEventHandler {
         //        currentCoord.x = currentCoord.x + xOffset;
         //        currentCoord.y = currentCoord.y + yOffset;
         if (desc == "leftWrist" || desc == "rightWrist") {
-            Debug.Log("Pos for " + desc + ": posePos: " + posePos + " -> currentCoord: " + currentCoord);
+//            Debug.Log("Pos for " + desc + ": posePos: " + posePos + " -> currentCoord: " + currentCoord);
         }
 
         Transform transform = node.transform;
