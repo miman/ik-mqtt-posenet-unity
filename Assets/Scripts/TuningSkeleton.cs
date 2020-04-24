@@ -71,14 +71,14 @@ public class TuningSkeleton : MonoBehaviour
 
     void OnEnable() {
         PoseCoreEventManager.onPoseEventReceived += onPoseEventReceived;
-        PoseCoreEventManager.onInitialPoseCalculated += onInitialPoseCalculated;
+        PoseCoreEventManager.onPoseCalibrationDone += onPoseCalibrationDone;
         Debug.Log("TuningSkeleton::onPoseEventReceived enabled");
     }
 
 
     void OnDisable() {
         PoseCoreEventManager.onPoseEventReceived -= onPoseEventReceived;
-        PoseCoreEventManager.onInitialPoseCalculated -= onInitialPoseCalculated;
+        PoseCoreEventManager.onPoseCalibrationDone -= onPoseCalibrationDone;
         Debug.Log("TuningSkeleton::onPoseEventReceived disabled");
     }
 
@@ -121,7 +121,7 @@ public class TuningSkeleton : MonoBehaviour
         lastPose = pose;
     }
 
-    public void onInitialPoseCalculated(BodyPositionState pose, float xAdjustmentToZero) {
+    public void onPoseCalibrationDone(BodyPositionState pose, float xAdjustmentToZero) {
         basePose = new BodyPositionState(pose);
         adjustmentToZero.Set(pose.root.x, xAdjustmentToZero+1, zLevel);
         Debug.Log("adjustmentToZero: " + adjustmentToZero.ToString());

@@ -52,7 +52,7 @@ public class DebugInfoDisplayer : MonoBehaviour
 
     void OnEnable() {
         PoseCoreEventManager.onPoseEventReceived += onPoseEventReceived;
-        PoseCoreEventManager.onInitialPoseCalculated += onInitialPoseCalculated;
+        PoseCoreEventManager.onPoseCalibrationDone += onPoseCalibrationDone;
         PoseCoreEventManager.onCrouching += onCrouching;
         PoseCoreEventManager.onJumping += onJumping;
         PoseCoreEventManager.onStandingInTPose += onStandingInTPose;
@@ -61,7 +61,7 @@ public class DebugInfoDisplayer : MonoBehaviour
 
     void OnDisable() {
         PoseCoreEventManager.onPoseEventReceived -= onPoseEventReceived;
-        PoseCoreEventManager.onInitialPoseCalculated -= onInitialPoseCalculated;
+        PoseCoreEventManager.onPoseCalibrationDone -= onPoseCalibrationDone;
         PoseCoreEventManager.onCrouching -= onCrouching;
         PoseCoreEventManager.onJumping -= onJumping;
         PoseCoreEventManager.onStandingInTPose -= onStandingInTPose;
@@ -88,7 +88,7 @@ public class DebugInfoDisplayer : MonoBehaviour
         }
     }
 
-    public void onInitialPoseCalculated(BodyPositionState pose, float xAdjustmentToZero) {
+    public void onPoseCalibrationDone(BodyPositionState pose, float xAdjustmentToZero) {
         averagePose = pose;
         this.xAdjustmentToZero = xAdjustmentToZero;
     }

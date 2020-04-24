@@ -60,8 +60,10 @@ public class PoseCoreEventManager : MonoBehaviour {
     public static event StandingInTPoseAction onStandingInTPose;
 
 
-    public delegate void InitialPoseAction(BodyPositionState pose, float xAdjustmentToZero);
-    public static event InitialPoseAction onInitialPoseCalculated;
+    public delegate void PoseCalibrationStartedAction(BodyPositionState pose);
+    public static event PoseCalibrationStartedAction onPoseCalibrationStarted;
+    public delegate void PoseCalibrationAction(BodyPositionState pose, float xAdjustmentToZero);
+    public static event PoseCalibrationAction onPoseCalibrationDone;
 
     /**
     * Last received posenet event, that is unprocessed
@@ -203,8 +205,15 @@ public class PoseCoreEventManager : MonoBehaviour {
                     if (onStandingInTPose != null) {
                         onStandingInTPose(START_END.STARTING, pose);
                     }
+                    if (onPoseCalibrationStarted != null) {
+                        onPoseCalibrationStarted(pose);
+                    }
                 }
             }
+            return; // We are calibrating -> no more handling
+        }
+        if (referencePose == null) {
+            return; // ref pose not set -> we cannot process the states
         }
         if (currentState == POSE_ACTION_STATE.NONE) {
             if ((pose.root.y - referencePose.root.y) < crouchingAdjustment) {
@@ -427,8 +436,8 @@ public class PoseCoreEventManager : MonoBehaviour {
         state.root = new PosePosition(rootVector);
         state.leftFoot = new PosePosition(leftFootvector);
         state.rightFoot = new PosePosition(rightFootvector);
-        if (onInitialPoseCalculated != null) {
-            onInitialPoseCalculated(state, xAdjustmentToZero);
+        if (onPoseCalibrationDone != null) {
+            onPoseCalibrationDone(state, xAdjustmentToZero);
         }
     }
 
