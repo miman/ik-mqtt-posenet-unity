@@ -57,7 +57,9 @@ public class BroadcastProxy {
     public void disconnect()
     {
         Debug.Log("Closing Brodcasting port listening");
-        udpSrvinfoClient.Client.Close();
+        if (udpSrvinfoClient.Client != null) {
+            udpSrvinfoClient.Client.Close();
+        }
     }
     /**
      * Send Broadcast request for server location info
