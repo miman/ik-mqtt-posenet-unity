@@ -14,8 +14,8 @@ public class PoseEventHandler: MonoBehaviour {
     public GameObject rightShoulder = null;
     public GameObject leftElbow = null;
     public GameObject rightElbow = null;
-    public GameObject leftWrist = null;
-    public GameObject rightWrist = null;
+    public GameObject leftHand = null;
+    public GameObject rightHand = null;
     public GameObject leftHip = null;
     public GameObject rightHip = null;
     public GameObject leftKnee = null;

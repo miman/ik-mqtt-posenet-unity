@@ -21,6 +21,14 @@ public class PoseInputController : PoseEventHandler {
     [Header("Camera")]
     public Camera cam;
 
+    [Header("Skeleton")]
+    [Tooltip("If we should draw the skeleton or not")]
+    public bool drawSkeleton = false;
+    [Tooltip("The material for the skeleton")]
+    public Material skeletonMaterial;
+    [Tooltip("The width of the skeleton bones")]
+    public float skeletonWidth = 0.01f;
+
     [Tooltip("Offset the player is in front of the camera")]
     public float playerZOffset = 20;
 
@@ -41,6 +49,11 @@ public class PoseInputController : PoseEventHandler {
     private Vector2 cameraDimension;
 
     /**
+     * Draws a skeleton if activated
+     */
+    private Skeleton skeleton = null;
+
+    /**
      * Called at startup.
      * Here we initiallize all values
      */
@@ -59,8 +72,8 @@ public class PoseInputController : PoseEventHandler {
         maxMinCoordMap.Add("rightShoulder", new MaxMinCoord());
         maxMinCoordMap.Add("leftElbow", new MaxMinCoord());
         maxMinCoordMap.Add("rightElbow", new MaxMinCoord());
-        maxMinCoordMap.Add("leftWrist", new MaxMinCoord());
-        maxMinCoordMap.Add("rightWrist", new MaxMinCoord());
+        maxMinCoordMap.Add("leftHand", new MaxMinCoord());
+        maxMinCoordMap.Add("rightHand", new MaxMinCoord());
         maxMinCoordMap.Add("leftHip", new MaxMinCoord());
         maxMinCoordMap.Add("rightHip", new MaxMinCoord());
         maxMinCoordMap.Add("leftKnee", new MaxMinCoord());
@@ -70,6 +83,36 @@ public class PoseInputController : PoseEventHandler {
 
         maxMinCoordMap.Add("Root", new MaxMinCoord());
         maxMinCoordMap.Add("MiddleSpine", new MaxMinCoord());
+
+        if (drawSkeleton) {
+            skeleton = new Skeleton();
+            skeleton.head = nose;
+            skeleton.root = root;
+            skeleton.middleSpine = middleSpine;
+
+            skeleton.leftEar = leftEar;
+            skeleton.rightEar = rightEar;
+            skeleton.rightElbow = rightElbow;
+            skeleton.rightEye = rightEye;
+            skeleton.rightFoot = rightFoot;
+            skeleton.rightHand = rightHand;
+            skeleton.rightHip = rightHip;
+            skeleton.rightKnee = rightKnee;
+            skeleton.rightShoulder = rightShoulder;
+            skeleton.leftEar = leftEar;
+            skeleton.leftElbow = leftElbow;
+            skeleton.leftEye = leftEye;
+            skeleton.leftFoot = leftFoot;
+            skeleton.leftHand = leftHand;
+            skeleton.leftHip = leftHip;
+            skeleton.leftKnee = leftKnee;
+            skeleton.leftShoulder = leftShoulder;
+
+            skeleton.material = skeletonMaterial;
+            skeleton.skeletonWidth = skeletonWidth;
+
+            skeleton.initiate();
+        }
     }
 
     public void Start() {
@@ -94,8 +137,8 @@ public class PoseInputController : PoseEventHandler {
             handleNodeMovement(lastPose.rightShoulder, rightShoulder, ref prevRightShoulderCoord, "rightShoulder");
             handleNodeMovement(lastPose.leftElbow, leftElbow, ref prevLeftElbowCoord, "leftElbow");
             handleNodeMovement(lastPose.rightElbow, rightElbow, ref prevRightElbowCoord, "rightElbow");
-            handleNodeMovement(lastPose.leftWrist, leftWrist, ref prevLeftWristCoord, "leftWrist");
-            handleNodeMovement(lastPose.rightWrist, rightWrist, ref prevRightWristCoord, "rightWrist");
+            handleNodeMovement(lastPose.leftWrist, leftHand, ref prevLeftWristCoord, "leftHand");
+            handleNodeMovement(lastPose.rightWrist, rightHand, ref prevRightWristCoord, "rightHand");
             handleNodeMovement(lastPose.leftHip, leftHip, ref prevLeftHipCoord, "leftHip");
             handleNodeMovement(lastPose.rightHip, rightHip, ref prevRightHipCoord, "rightHip");
             handleNodeMovement(lastPose.leftKnee, leftKnee, ref prevLeftKneeCoord, "leftKnee");
@@ -117,6 +160,9 @@ public class PoseInputController : PoseEventHandler {
         } else
         {
 //            Debug.Log("No lastPose present");
+        }
+        if (drawSkeleton && skeleton != null) {
+            skeleton.Update();
         }
     }
 
@@ -151,12 +197,6 @@ public class PoseInputController : PoseEventHandler {
 
         previousCoord.x = currentCoord.x;
         previousCoord.y = currentCoord.y;
-        // Add offset
-        //        currentCoord.x = currentCoord.x + xOffset;
-        //        currentCoord.y = currentCoord.y + yOffset;
-        if (desc == "leftWrist" || desc == "rightWrist") {
-//            Debug.Log("Pos for " + desc + ": posePos: " + posePos + " -> currentCoord: " + currentCoord);
-        }
 
         Transform transform = node.transform;
         transform.localPosition = new Vector3(currentCoord.x, currentCoord.y, transform.localPosition.z);
