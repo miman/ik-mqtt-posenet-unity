@@ -988,8 +988,8 @@ MonoBehaviour:
   rightShoulder: {fileID: 75727143}
   leftElbow: {fileID: 0}
   rightElbow: {fileID: 0}
-  leftWrist: {fileID: 149434834}
-  rightWrist: {fileID: 822770789}
+  leftHand: {fileID: 149434834}
+  rightHand: {fileID: 822770789}
   leftHip: {fileID: 0}
   rightHip: {fileID: 0}
   leftKnee: {fileID: 0}
@@ -1233,6 +1233,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4a9eb032e1057df428f290f5ddc7f895, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  doCalibration: 1
+  secsForCalibration: 2
+  calibrationDelay: 0.2
+  jumpingAdjustment: 7
+  crouchingAdjustment: -8
 --- !u!4 &1309222637
 Transform:
   m_ObjectHideFlags: 0
@@ -1607,8 +1612,8 @@ MonoBehaviour:
   rightShoulder: {fileID: 75727143}
   leftElbow: {fileID: 0}
   rightElbow: {fileID: 0}
-  leftWrist: {fileID: 822770789}
-  rightWrist: {fileID: 149434834}
+  leftHand: {fileID: 0}
+  rightHand: {fileID: 0}
   leftHip: {fileID: 0}
   rightHip: {fileID: 0}
   leftKnee: {fileID: 0}
