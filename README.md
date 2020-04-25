@@ -46,3 +46,6 @@ To enable you to control game objects in a scene you need to do the following st
 1. Create the game objects you want to control & drag these to the correct body part in the Player object
 1. The body parts hould now move according to your body movements
 
+# Webcast tutorial
+Below is a link to a webcast tutorial on how to create a Unity application using the PoseCore server to get body tracking data:
+https://youtu.be/OZMrnhCYjgI
