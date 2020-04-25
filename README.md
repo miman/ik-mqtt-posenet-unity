@@ -29,15 +29,20 @@ It will try to calculate the pose-value vs body size in the app ratio & location
 ## Steps to do
 To enable you to control game objects in a scene you need to do the following steps.
 
-1. Create an empty game object (called for example "MqttConnection")
-2. Drag the MqttController script into this controller.
-3. Configure the script to communicate with a specific MQTT server in One of these 2 ways
-    3a. Check "Is using broadcast", then the component will try to find the server using the broadcasts mechanism
-    3b. Uncheck "Is using broadcast", then the component will connect to the server you specify
-4. Create empty game object (called for example "Player")
-5. Drag the script "PoseAvatarInputController" OR "PoseInputController" to this object
-6. increase the size of event handlers to 1 in the MqttConnection
-7. Create an Empty GameObject called for example PoseEventMgr & drag the script PoseCoreEventManager into this object
-8. Create the game objects you want to control & drag these to the correct body part in the Player object
-9. The body parts hould now mova according to your body movements
+1. Create a new Lib folder in your project for the MQTT lib files
+1. Drag in the MQTT library files into the new project from folder Assets/MqttLib in this project
+1. Create a new PoseCore folder in your project for the PoseCore script files
+1. Drag in all files from the Assets/PosenetScripts folder into the PoseCore folder you created in your project
+1. Create an empty game object (called for example "PoseCoreConnection")
+1. Drag the MqttController script into this controller.
+1. Configure the script to communicate with a specific MQTT server in One of these 2 ways
+    - Check "Is using broadcast", then the component will try to find the server using the broadcasts mechanism
+    - Uncheck "Is using broadcast", then the component will connect to the server you specify
+1. Drag the PoseCoreEventManager script into this controller object as well.
+1. Drag the PoseCoreEventManager object into the Pose Core Event Manager member field in the Mqtt Controller object
+1. Create empty game object (called for example "Player")
+1. Drag the script "PoseAvatarInputController" OR "PoseInputController" to this object
+1. Drag the camera object into the Cam field in the Pose Input Controller
+1. Create the game objects you want to control & drag these to the correct body part in the Player object
+1. The body parts hould now move according to your body movements
 
